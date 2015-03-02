@@ -14,6 +14,30 @@ L['PANEL_DESC'] = "调整左、右对话框的大小，此设定将会影响对�
 L["SKINS_DESC"] = "调整外观设定."
 L["TOGGLESKIN_DESC"] = "启用/停用此外观."
 L["TOOLTIP_DESC"] = "鼠标提示资讯设定选项."
+L["SEARCH_SYNTAX_DESC"] = [=[With the new addition of LibItemSearch, you now have access to much more advanced item searches. The following is a documentation of the search syntax. See the full explanation at: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
+
+Specific Searching:
+    • q:[quality] or quality:[quality]. For instance, q:epic will find all epic items.
+    • l:[level], lvl:[level] or level:[level]. For example, l:30 will find all items with level 30.
+    • t:[search], type:[search] or slot:[search]. For instance, t:weapon will find all weapons.
+    • n:[name] or name:[name]. For instance, typing n:muffins will find all items with names containing "muffins".
+    • s:[set] or set:[set]. For example, s:fire will find all items in equipment sets you have with names that start with fire.
+    • tt:[search], tip:[search] or tooltip:[search]. For instance, tt:binds will find all items that can be bound to account, on equip, or on pickup.
+
+	
+Search Operators:
+    • ! : Negates a search. For example, !q:epic will find all items that are NOT epic.
+    • | : Joins two searches. Typing q:epic | t:weapon will find all items that are either epic OR weapons.
+    • & : Intersects two searches. For instance, q:epic & t:weapon will find all items that are epic AND weapons
+    • >, <, <=, => : Performs comparisons on numerical searches. For example, typing lvl: >30 will find all items with level HIGHER than 30.
+
+
+The following search keywords can also be used:
+    • soulbound, bound, bop : Bind on pickup items.
+    • bou : Bind on use items.
+    • boe : Bind on equip items.
+    • boa : Bind on account items.
+    • quest : Quest bound items.]=];
 L['TEXT_FORMAT_DESC'] = [=[提供一个更改文字格式的方式
 
 例如:
@@ -118,6 +142,7 @@ L['List of items to ignore when sorting. If you wish to add multiple items you m
 L['Money Format'] = true;
 L['Panel Width (Bags)'] = '背包面板宽度'
 L['Panel Width (Bank)'] = '银行面板宽度'
+L["Search Syntax"] = true;
 L["Set the size of your bag buttons."] = "设置背包按钮尺寸."
 L['Short (Whole Numbers)'] = true;
 L['Short'] = true;
@@ -460,6 +485,8 @@ L["Threat"] = "仇恨"
 L["Toggle the nameplates to be visible outside of combat and visible inside combat."] = true;
 L["Use this filter."] = "使用过滤器"
 L["Vertical Arrow"] = true;
+L["Wrap Name"] = true;
+L["Wraps name instead of truncating it."] = true;
 L['X-Offset'] = true;
 L['Y-Offset'] = true;
 L["You can't remove a default name from the filter, disabling the name."] = "你不能删除过滤器的预设筛选名, 仅能停用此筛选名"
@@ -669,7 +696,9 @@ L["Filled"] = "全长"
 L["Filter Type"] = "过滤器类型"
 L['Force Off'] = "强制关闭"
 L['Force On'] = "强制开启"
+L['Force Reaction Color'] = true;
 L['Force the frames to show, they will act as if they are the player frame.'] = "强制框架显示."
+L['Forces reaction color instead of class color on units controlled by players.'] = true;
 L["Format"] = "格式"
 L["Frame"] = "框架"
 L["Frequent Updates"] = "频繁更新"
@@ -754,6 +783,8 @@ L["Percent"] = "百分比"
 L["Personal"] = "个人的"
 L['Pet Name'] = true;
 L["Portrait"] = "单位"
+L["Position the Model horizontally."] = true;
+L["Position the Model vertically."] = true;
 L["Position"] = "位置"
 L["Power text will be hidden on NPC targets, in addition the name text will be repositioned to the power texts anchor point."] = "NPC 目标将隐藏能量值文字"
 L["Power"] = "能量"

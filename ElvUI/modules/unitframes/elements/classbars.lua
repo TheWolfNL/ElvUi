@@ -14,7 +14,7 @@ function UF:Construct_PaladinResourceBar(frame)
 	bars:CreateBackdrop('Default')
 
 	for i = 1, UF['classMaxResourceBar'][E.myclass] do
-		bars[i] = CreateFrame("StatusBar", nil, bars)
+		bars[i] = CreateFrame("StatusBar", frame:GetName().."ClassBarButton"..i, bars)
 		bars[i]:SetStatusBarTexture(E['media'].blankTex) --Dummy really, this needs to be set so we can change the color
 		bars[i]:GetStatusBarTexture():SetHorizTile(false)
 		UF['statusbars'][bars[i]] = true
@@ -32,6 +32,7 @@ function UF:UpdateHoly(event, unit, powerType)
 	if (self.unit ~= unit or (powerType and powerType ~= 'HOLY_POWER')) then return end
 	local db = self.db
 	if not db then return; end
+
 	local BORDER = E.Border
 	local numHolyPower = UnitPower('player', SPELL_POWER_HOLY_POWER);
 	local maxHolyPower = UnitPowerMax('player', SPELL_POWER_HOLY_POWER);
@@ -108,7 +109,7 @@ function UF:Construct_MonkResourceBar(frame)
 	bars:CreateBackdrop('Default')
 
 	for i = 1, UF['classMaxResourceBar'][E.myclass] do
-		bars[i] = CreateFrame("StatusBar", nil, bars)
+		bars[i] = CreateFrame("StatusBar", frame:GetName().."ClassBarButton"..i, bars)
 		bars[i]:SetStatusBarTexture(E['media'].blankTex) --Dummy really, this needs to be set so we can change the color
 		bars[i]:GetStatusBarTexture():SetHorizTile(false)
 		UF['statusbars'][bars[i]] = true
@@ -215,7 +216,7 @@ function UF:Construct_MageResourceBar(frame)
 	bars:CreateBackdrop('Default')
 
 	for i = 1, UF['classMaxResourceBar'][E.myclass] do
-		bars[i] = CreateFrame("StatusBar", nil, bars)
+		bars[i] = CreateFrame("StatusBar", frame:GetName().."ClassBarButton"..i, bars)
 		bars[i]:SetStatusBarTexture(E['media'].blankTex) --Dummy really, this needs to be set so we can change the color
 		bars[i]:GetStatusBarTexture():SetHorizTile(false)
 
@@ -235,6 +236,7 @@ end
 function UF:UpdateArcaneCharges(event, unit, arcaneCharges, maxCharges)
 	local frame = self:GetParent()
 	local db = frame.db
+	if not db then return; end
 
 	local point, _, anchorPoint, x, y = frame.Health:GetPoint()
 	if self:IsShown() and point then
@@ -259,7 +261,7 @@ function UF:Construct_RogueResourceBar(frame)
 	bars:CreateBackdrop('Default')
 
 	for i = 1, UF['classMaxResourceBar'][E.myclass] do
-		bars[i] = CreateFrame("StatusBar", nil, bars)
+		bars[i] = CreateFrame("StatusBar", frame:GetName().."ClassBarButton"..i, bars)
 		bars[i]:SetStatusBarTexture(E['media'].blankTex) --Dummy really, this needs to be set so we can change the color
 		bars[i]:GetStatusBarTexture():SetHorizTile(false)
 
@@ -279,6 +281,7 @@ end
 function UF:UpdateAnticipationCharges(event, unit, numCharges, maxCharges)
 	local frame = self:GetParent()
 	local db = frame.db
+	if not db then return; end
 
 	local point, _, anchorPoint, x, y = frame.Health:GetPoint()
 	if self:IsShown() and point then
@@ -303,7 +306,7 @@ function UF:Construct_WarlockResourceBar(frame)
 	bars:CreateBackdrop('Default')
 
 	for i = 1, UF['classMaxResourceBar'][E.myclass] do
-		bars[i] = CreateFrame("StatusBar", nil, bars)
+		bars[i] = CreateFrame("StatusBar", frame:GetName().."ClassBarButton"..i, bars)
 		bars[i]:SetStatusBarTexture(E['media'].blankTex) --Dummy really, this needs to be set so we can change the color
 		bars[i]:GetStatusBarTexture():SetHorizTile(false)
 		bars[i].bg = bars[i]:CreateTexture(nil, 'ARTWORK')
@@ -321,8 +324,8 @@ end
 function UF:UpdateShardBar(spec)
 	local frame = self:GetParent()
 	local db = frame.db
-
 	if not db then return; end
+
 	local maxBars = self.number
 
 	for i=1, UF['classMaxResourceBar'][E.myclass] do
@@ -367,7 +370,7 @@ function UF:Construct_PriestResourceBar(frame)
 	bars:CreateBackdrop('Default')
 
 	for i = 1, UF['classMaxResourceBar'][E.myclass] do
-		bars[i] = CreateFrame("StatusBar", nil, bars)
+		bars[i] = CreateFrame("StatusBar", frame:GetName().."ClassBarButton"..i, bars)
 		bars[i]:SetStatusBarTexture(E['media'].blankTex) --Dummy really, this needs to be set so we can change the color
 		bars[i]:GetStatusBarTexture():SetHorizTile(false)
 		UF['statusbars'][bars[i]] = true
@@ -384,6 +387,7 @@ end
 function UF:UpdateShadowOrbs(event, unit, powerType)
 	local frame = self:GetParent()
 	local db = frame.db
+	if not db then return; end
 
 	local point, _, anchorPoint, x, y = frame.Health:GetPoint()
 	if self:IsShown() and point and not db.classbar.detachFromFrame then

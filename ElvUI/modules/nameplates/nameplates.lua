@@ -490,6 +490,7 @@ function NP:SetUnitInfo(myPlate)
 		end
 		self.guid = UnitGUID("mouseover")
 		self.unit = "mouseover"
+		NP:UpdateAurasByUnitID('mouseover')
 	else
 		myPlate:SetFrameLevel(0)
 		myPlate.overlay:Hide()
@@ -833,10 +834,12 @@ function NP:UpdateSettings()
 	local myPlate = NP.CreatedPlates[self]
 	local font = LSM:Fetch("font", NP.db.font)
 	local fontSize, fontOutline = NP.db.fontSize, NP.db.fontOutline
+	local wrapName = NP.db.wrapName
 
 	--Name
 	myPlate.name:FontTemplate(font, fontSize, fontOutline)
 	myPlate.name:SetTextColor(1, 1, 1)
+	myPlate.name:SetWordWrap(wrapName == true and true or false)
 
 	--Level
 	myPlate.level:FontTemplate(font, fontSize, fontOutline)
@@ -1371,7 +1374,7 @@ function NP:ClearAuraContext(frame)
 	AuraList[frame] = nil
 end
 
-function NP:RemoveAuraInstance(guid, spellID)
+function NP:RemoveAuraInstance(guid, spellID, caster)
 	if guid and spellID and NP.AuraList[guid] then
 		local instanceID = tostring(guid)..tostring(spellID)..(tostring(caster or "UNKNOWN_CASTER"))
 		local auraID = spellID..(tostring(caster or "UNKNOWN_CASTER"))
@@ -1475,7 +1478,7 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 			local texture = GetSpellTexture(spellID)
 			NP:SetAuraInstance(destGUID, spellID, GetTime() + (duration or 0), stackCount, sourceGUID, duration, texture, auraType, AURA_TARGET_HOSTILE)
 		elseif event == "SPELL_AURA_BROKEN" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_REMOVED" then
-			NP:RemoveAuraInstance(destGUID, spellID)
+			NP:RemoveAuraInstance(destGUID, spellID, sourceGUID)
 		end
 
 		local name, raidIcon
