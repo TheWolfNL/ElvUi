@@ -796,7 +796,7 @@ function E:BeginFoolsDayEvent()
 	self.massiveShakeObjects = {}
 	tinsert(self.massiveShakeObjects, GameTooltip)
 	tinsert(self.massiveShakeObjects, Minimap)
-	tinsert(self.massiveShakeObjects, WatchFrame)
+	tinsert(self.massiveShakeObjects, ObjectiveTrackerFrame)
 	tinsert(self.massiveShakeObjects, LeftChatPanel)
 	tinsert(self.massiveShakeObjects, RightChatPanel)
 	tinsert(self.massiveShakeObjects,LeftChatToggleButton)
@@ -1186,6 +1186,6 @@ function E:Initialize()
 	collectgarbage("collect");
 
 	if self.db.general.loginmessage then
-		print(select(2, E:GetModule('Chat'):FindURL("CHAT_MSG_DUMMY", format(L['LOGIN_MSG'], self["media"].hexvaluecolor, self["media"].hexvaluecolor, self.version)))..'.')
+		print(select(2, E:GetModule('Chat'):FindURL("CHAT_MSG_DUMMY", format(L["LOGIN_MSG"], self["media"].hexvaluecolor, self["media"].hexvaluecolor, self.version)))..'.')
 	end
 end

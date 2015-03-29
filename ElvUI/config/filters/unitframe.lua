@@ -747,7 +747,7 @@ G.unitframe.ChannelTicks = {
 	--Mage
 	[SpellName(5143)] = 5, -- "Arcane Missiles"
 	[SpellName(10)] = 8, -- "Blizzard"
-	[SpellName(12051)] = 4, -- "Evocation"
+	[SpellName(12051)] = 3, -- "Evocation"
 
 	--Monk
 	[SpellName(115175)] = 9, -- "Smoothing Mist"
@@ -757,7 +757,7 @@ local priestTier17 = {115560,115561,115562,115563,115564}
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-f:SetScript("OnEvent", function(self)
+f:SetScript("OnEvent", function(self, event)
 	local class = select(2, UnitClass("player"))
 	if string.lower(class) ~= "priest" then return; end
 

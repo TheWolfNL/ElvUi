@@ -294,6 +294,7 @@ P['chat'] = {
 	['panelTabBackdrop'] = false,
 	['panelTabTransparency'] = false,
 	['editBoxPosition'] = 'BELOW_CHAT',
+	['fadeUndockedTabs'] = true,
 
 	['tabFont'] = 'ElvUI Pixel',
 	['tabFontSize'] = 10,
@@ -1832,6 +1833,11 @@ P['unitframe'] = {
 				['xOffset'] = 0,
 				['yOffset'] = 10,
 			},
+		},
+		['bodyguard'] = {
+			['enable'] = true,
+			['width'] = 120,
+			['height'] = 28
 		},
 		['tank'] = {
 			['enable'] = true,
