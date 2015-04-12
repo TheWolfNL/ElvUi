@@ -255,6 +255,7 @@ L["MT Frames"] = true;
 L["Objective Frame"] = true;
 L["Party Frames"] = true; --Also used in UnitFrames
 L["Pet Bar"] = true; --Also in ActionBars
+L["Pet Castbar"] = true;
 L["Pet Frame"] = true; --Also used in UnitFrames
 L["PetTarget Frame"] = true; --Also used in UnitFrames
 L["Player Buffs"] = true;
@@ -324,7 +325,7 @@ L["Oh lord, you have got ElvUI and Tukui both enabled at the same time. Select a
 L["One or more of the changes you have made require a ReloadUI."] = true;
 L["One or more of the changes you have made will effect all characters using this addon. You will have to reload the user interface to see the changes you have made."] = true;
 L["Save"] = true;
-L["Type /aprilfools to revert to old settings."] = true;
+L["Type /hellokitty to revert to old settings."] = true;
 L["Using the healer layout it is highly recommended you download the addon Clique if you wish to have the click-to-heal function."] = true;
 L["Yes, Keep Changes!"] = true;
 L["You have changed the pixel perfect option. You will have to complete the installation process to remove any graphical bugs."] = true;

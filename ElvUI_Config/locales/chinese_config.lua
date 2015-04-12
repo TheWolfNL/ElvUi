@@ -54,9 +54,9 @@ L["TEXT_FORMAT_DESC"] = [=[提供一个更改文字格式的方式
 'deficit' - 赤字. 当没有赤字时不显示
 
 姓名格式:
-'name-short' - 姓名显示限制于10字节内
-'name-medium' -姓名显示限制于15字节内
-'name-long' - 姓名显示限制于20字节内
+'name:short' - 姓名显示限制于10字节内
+'name:medium' -姓名显示限制于15字节内
+'name:long' - 姓名显示限制于20字节内
 
 空白则为禁用. 如需技术支援请至 http://www.tukui.org]=];
 
@@ -133,11 +133,15 @@ L["Condensed"] = true;
 L["Currency Format"] = "货币格式"
 L["Descending"] = "降序"
 L["Direction the bag sorting will use to allocate the items."] = '整理背包时物品排序方向.'
+L["Display Item Level"] = true;
+L["Displays item level on equippable items."] = true;
 L["Enable/Disable the all-in-one bag."] = "开/关整合背包。"
 L["Enable/Disable the Bag-Bar."] = "启用/禁用 背包条."
 L["Full"] = true;
 L["Icons and Text"] = "图标和文字"
 L["Ignore Items"] = "忽略项目"
+L["Item Level Threshold"] = true;
+L["Item Level"] = true;
 L["List of items to ignore when sorting. If you wish to add multiple items you must seperate the word with a comma."] = "忽略清单中的项目，如果你想添加多个项目，你必须用逗号将它们分开."
 L["Money Format"] = true;
 L["Panel Width (Bags)"] = '背包面板宽度'
@@ -155,6 +159,7 @@ L["The direction that the bag frames will grow from the anchor."] = "背包框�
 L["The display format of the currency icons that get displayed below the main bag. (You have to be watching a currency for this to display)"] = "背包底部的货币显示格式. (你需要在货币页中勾选显示)."
 L["The display format of the money text that is shown at the top of the main bag."] = true;
 L["The frame is not shown unless you mouse over the frame."] = "仅于滑鼠移经动作列时显示其框架."
+L["The minimum item level required for it to be shown."] = true;
 L["The size of the individual buttons on the bag frame."] = '背包框架单个格子的尺寸.'
 L["The size of the individual buttons on the bank frame."] = '银行框架单个格子的尺寸.'
 L["The spacing between buttons."] = "两个按钮间的距离"
@@ -212,8 +217,10 @@ L["Display LFG Icons in group chat."] = true;
 L["Display the hyperlink tooltip while hovering over a hyperlink."] = "鼠标悬停在超链接上时显示链接提示框"
 L["Enable the use of separate size options for the right chat panel."] = true;
 L["Fade Chat"] = '对话内容渐隐'
+L["Fade Tabs No Backdrop"] = true;
 L["Fade the chat text when there is no activity."] = '渐隐对话框内长期不活动的文字.'
 L["Fade Undocked Tabs"] = true;
+L["Fades the text on chat tabs that are docked in a panel where the backdrop is disabled."] = true;
 L["Fades the text on chat tabs that are not docked at the left or right chat panel."] = true;
 L["Font Outline"] = "字体描边"
 L["Font"] = "字体"
@@ -843,6 +850,7 @@ L["Spark"] = "火花"
 L["Spec Icon"] = "天赋图标"
 L["Spell not found in list."] = "列表中未发现技能"
 L["Spells"] = "技能"
+L["Stack Threshold"] = true;
 L["Stagger Bar"] = "醉酒列"
 L["Start Near Center"] = "从中心开始"
 L["StatusBar Texture"] = "状态条材质"
@@ -862,6 +870,7 @@ L["Text yOffset"] = "文字Y轴偏移"
 L["Text"] = "文本"
 L["Textured Icon"] = "图标纹理"
 L["The alpha to set units that are out of range to."] = "单位框架超出距离的透明度"
+L["The debuff needs to reach this amount of stacks before it is shown. Set to 0 to always show the debuff."] = true;
 L["The following macro must be true in order for the group to be shown, in addition to any filter that may already be set."] = "为了显示设定过的过滤器下面的巨集必须启用"
 L["The font that the unitframes will use."] = "单位框架字体"
 L["The initial group will start near the center and grow out."] = "最初的队伍由中心开始增长."

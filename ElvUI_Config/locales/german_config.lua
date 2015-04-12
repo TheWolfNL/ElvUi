@@ -54,9 +54,9 @@ Leben / Kraft Formate:
 'deficit' - Zeigt das Defizit. Es wird nichts angezeigt, wenn kein Defizit vorhanden ist
 
 Namensformate:
-'name-short' - Name auf 10 Zeichen beschränkt
-'name-medium' - Name auf 15 Zeichen beschränkt
-'name-long' - Name auf 20 Zeichen beschränkt
+'name:short' - Name auf 10 Zeichen beschränkt
+'name:medium' - Name auf 15 Zeichen beschränkt
+'name:long' - Name auf 20 Zeichen beschränkt
 
 Zum Deaktvieren lasse das Feld leer. Brauchst du mehr Informationen besuche http://www.tukui.org]=];
 
@@ -131,11 +131,15 @@ L["Condensed"] = 'Gekürzt'
 L["Currency Format"] = 'Währungsformat'
 L["Descending"] = "Absteigend"
 L["Direction the bag sorting will use to allocate the items."] = "Die Richtung, in welche die Gegenstände in den Taschen sortiert werden."
+L["Display Item Level"] = "Itemlevel anzeigen"
+L["Displays item level on equippable items."] = "Zeigt das Itemlevel für ausrüstbare Gegenstände an."
 L["Enable/Disable the all-in-one bag."] = "Einschalten/Ausschalten der zusammengefassten Tasche."
 L["Enable/Disable the Bag-Bar."] = "Aktiviere/Deaktiviere die Taschenleiste."
 L["Full"] = 'Voll'
 L["Icons and Text"] = "Symbole und Text"
 L["Ignore Items"] = 'Ignoriere Items'
+L["Item Level Threshold"] = "Itemlevel Schwellenwert"
+L["Item Level"] = "Itemlevel"
 L["List of items to ignore when sorting. If you wish to add multiple items you must seperate the word with a comma."] = 'Liste von Items die beim sortieren ignoriert werden. Wenn du willst kannst du auch mehrere Items hinzufügen du musst nur nachdem Wort ein Komma setzen.'
 L["Money Format"] = 'Geldformat'
 L["Panel Width (Bags)"] = 'Leistenbreite (Taschen)'
@@ -153,6 +157,7 @@ L["The direction that the bag frames will grow from the anchor."] = "Die Richtun
 L["The display format of the currency icons that get displayed below the main bag. (You have to be watching a currency for this to display)"] = 'Das Anzeigeformat für die Währungssymbole, welche unter der Haupttasche angezeigt werden. (Du musst eine Währung beobachten, damit diese angezeigt wird)'
 L["The display format of the money text that is shown at the top of the main bag."] = 'Das Anzeigeformat für Gold oben an der Haupttasche.'
 L["The frame is not shown unless you mouse over the frame."] = "Das Fenster ist nicht sichtbar, außer man bewegt die Maus darüber."
+L["The minimum item level required for it to be shown."] = "Das minimale Itemlevel um angezeigt zu werden."
 L["The size of the individual buttons on the bag frame."] = 'Die Größe der einzelnen Buttons auf dem Taschenfenster.'
 L["The size of the individual buttons on the bank frame."] = 'Die Größe der einzelnen Buttons auf dem Bankfenster.'
 L["The spacing between buttons."] = "Der Abstand zwischen den Taschenbuttons."
@@ -210,8 +215,10 @@ L["Display LFG Icons in group chat."] = "LFG Symbole im Gruppenchat anzeigen"
 L["Display the hyperlink tooltip while hovering over a hyperlink."] = "Zeigt den Hyperlink Tooltip beim Überfahren eines Hyperlinks."
 L["Enable the use of separate size options for the right chat panel."] = 'Benutze getrennte Größenoptionen für das rechte Chatfenster.'
 L["Fade Chat"] = 'Chat Verblassen'
+L["Fade Tabs No Backdrop"] = "Verblasst Tabs ohne Hintergrund"
 L["Fade the chat text when there is no activity."] = 'Lässt den Chat Text verblassen, wenn keine Aktivität besteht.'
 L["Fade Undocked Tabs"] = "Verblasst nicht angedockte Tabs"
+L["Fades the text on chat tabs that are docked in a panel where the backdrop is disabled."] = "Verblasst den Text für die Chat Tabs, die nicht angedockt sind und der Hintergrund deaktiviert ist."
 L["Fades the text on chat tabs that are not docked at the left or right chat panel."] = "Verblasst den Text für die Chat Tabs, die nicht am linken oder rechten Chat angedockt sind."
 L["Font Outline"] = "Kontur der Schriftart" --Also used in UnitFrames section
 L["Font"] = "Schriftart"
@@ -841,6 +848,7 @@ L["Spark"] = "Funken"
 L["Spec Icon"] = 'Talentspezialisierungssymbol'
 L["Spell not found in list."] = "Zauber in der Liste nicht gefunden."
 L["Spells"] = 'Zauber'
+L["Stack Threshold"] = "Stack Schwellenwert"
 L["Stagger Bar"] = 'Staffel Leiste'
 L["Start Near Center"] = "Starte nahe der Mitte"
 L["StatusBar Texture"] = "Statusleistentextur"
@@ -860,6 +868,7 @@ L["Text yOffset"] = 'Text Y-Versatz'
 L["Text"] = 'Text'
 L["Textured Icon"] = 'Texturiertes Symbol'
 L["The alpha to set units that are out of range to."] = "Setzt den Alphabereich für Einheiten, die ausserhalb deiner Reichweite sind."
+L["The debuff needs to reach this amount of stacks before it is shown. Set to 0 to always show the debuff."] = "Der Schwächungszauber muss erst den angegebenen Wert erreichen um angezeigt zu werden. 0 zeigt den Schwächungszauber immer an."
 L["The following macro must be true in order for the group to be shown, in addition to any filter that may already be set."] = "Das folgende Makro muss wahr sein um die Gruppe anzuzeigen. Dies gilt zusätzlich zu jeglichem Filter der möglicherweise bereits eingestellt ist."
 L["The font that the unitframes will use."] = "Die Schriftart, welche die Einheitenfenster benutzen sollen."
 L["The initial group will start near the center and grow out."] = "Die anfängliche Gruppe wird nahe der Mitte starten und dann wachsen"
