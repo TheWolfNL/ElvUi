@@ -14,30 +14,30 @@ L["PANEL_DESC"] = "Stellt die Größe der linken und rechten Leisten ein, dies h
 L["SKINS_DESC"] = "Passe die Einstellungen für externe Addon Skins/Optionen an."
 L["TOGGLESKIN_DESC"] = "Aktiviere/Deaktiviere diesen Skin."
 L["TOOLTIP_DESC"] = "Konfiguriere die Einstellungen für Tooltips."
-L["SEARCH_SYNTAX_DESC"] = [=[With the new addition of LibItemSearch, you now have access to much more advanced item searches. The following is a documentation of the search syntax. See the full explanation at: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
+L["SEARCH_SYNTAX_DESC"] = [=[Mit der Ergänzung von LibItemSearch, kannst du jetzt erweitert nach Gegenständen suchen. Nachfolgend findest du eine Dokumentation des Suchsyntax. Die volle Erklärung findest du hier: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
 
-Specific Searching:
-    • q:[quality] or quality:[quality]. For instance, q:epic will find all epic items.
-    • l:[level], lvl:[level] or level:[level]. For example, l:30 will find all items with level 30.
-    • t:[search], type:[search] or slot:[search]. For instance, t:weapon will find all weapons.
-    • n:[name] or name:[name]. For instance, typing n:muffins will find all items with names containing "muffins".
-    • s:[set] or set:[set]. For example, s:fire will find all items in equipment sets you have with names that start with fire.
-    • tt:[search], tip:[search] or tooltip:[search]. For instance, tt:binds will find all items that can be bound to account, on equip, or on pickup.
-
-
-Search Operators:
-    • ! : Negates a search. For example, !q:epic will find all items that are NOT epic.
-    • | : Joins two searches. Typing q:epic | t:weapon will find all items that are either epic OR weapons.
-    • & : Intersects two searches. For instance, q:epic & t:weapon will find all items that are epic AND weapons
-    • >, <, <=, => : Performs comparisons on numerical searches. For example, typing lvl: >30 will find all items with level HIGHER than 30.
+Spezifische Suche:
+    • q:[quality] oder quality:[quality]. Beispielsweise q:episch findet alle epischen Gegenstände.
+    • l:[level], lvl:[level] oder level:[level]. Zum Beispiel: l:30 findet alle Gegenstände mit Level 30.
+    • t:[suche], type:[suche] oder slot:[suche]. Beispielsweise t:waffe findet alle Waffen.
+    • n:[name] oder name:[name]. Beispielsweise wenn du n:muffins eintippst, findest du alle Gegenstände die "muffins" im Namen haben.
+    • s:[set] oder set:[set]. Zum Beispiel: s:feuer findet alle Gegenstände eines Ausrüstungssets mit Feuer im Namen.
+    • tt:[suche], tip:[suche] oder tooltip:[suche]. Beispielsweise tt:gebunden findet alle Gegenstände die am Account, beim Aufheben oder beim Ausrüsten gebunden sind.
 
 
-The following search keywords can also be used:
-    • soulbound, bound, bop : Bind on pickup items.
-    • bou : Bind on use items.
-    • boe : Bind on equip items.
-    • boa : Bind on account items.
-    • quest : Quest bound items.]=];
+Suchoperatoren:
+    • ! : Negiert eine Suche. Zum Beispiel !q:episch findet alle Gegenstände die NICHT episch sind.
+    • | : Kombiniert zwei Suchen. q:episch | t:waffe findet alle Gegenstände die episch ODER Waffen sind.
+    • & : Teilt zwei Suchen. Beispielsweise q:episch & t:waffen findet alle Gegenstände die episch UND Waffen sind.
+    • >, <, <=, => : Führt eine numerische Suche durch. Zum Beispiel: lvl: >30 findet alle Gegenstände mit Level 30 oder HÖHER.
+
+
+Die folgenden Suchbegriffe können auch benutzt werden:
+    • soulbound, bound, bop : Beim Aufheben gebundene Gegenstände.
+    • bou : Beim Benutzen gebundene Gegenstände.
+    • boe : Beim Ausrüsten gebundene Gegenstände.
+    • boa : An den Account gebundene Gegenstände.
+    • quest : Gebundene Quest Gegenstände.]=];
 L["TEXT_FORMAT_DESC"] = [=[Wähle eine Zeichenfolge um das Textformat zu ändern.
 
 Beispiele:
@@ -341,7 +341,8 @@ L["Automatically select greed or disenchant (when available) on green quality it
 L["Automatically vendor gray items when visiting a vendor."] = "Automatischer Verkauf von grauen Gegenständen bei einem Händlerbesuch."
 L["Bonus Reward Position"] = "Bonusbeute Position"
 L["Bottom Panel"] = 'Untere Leiste'
-L["Chat Bubbles Style"] = 'Chat-Blasen Stil'
+L["Chat Bubbles Style"] = "Sprechblasen Stil"
+L["Chat Bubbles"] = "Sprechblasen"
 L["Direction the bar moves on gains/losses"] = "Richtung in die der Balken wächst/sinkt"
 L["Display a panel across the bottom of the screen. This is for cosmetic only."] = 'Zeige eine Leiste am unterem Bildschirmrand. Das ist rein kosmetisch.'
 L["Display a panel across the top of the screen. This is for cosmetic only."] = 'Zeige eine Leiste am oberen Bildschirmrand. Das ist rein kosmetisch.'
@@ -518,7 +519,7 @@ L["Debug Tools"] = "Debug Tools"
 L["Dressing Room"] = "Ankleideraum"
 L["Encounter Journal"] = "Dungeonkompendium"
 L["Glyph Frame"] = "Glyphenfenster"
-L["Gossip Frame"] = "Chatfenster"
+L["Gossip Frame"] = "Questinhalt Fenster"
 L["Greeting Frame"] = "Begrüßungsfenster"
 L["Guild Bank"] = "Gildenbank"
 L["Guild Control Frame"] = "Gildenkontrollfenster"
@@ -602,6 +603,7 @@ L["Allow Boss Encounter Auras"] = "Erlaube Bosskampf Auren"
 L["Allow Whitelisted Auras"] = "Erlaube Whitelisted Auren"
 L["An X offset (in pixels) to be used when anchoring new frames."] = "X-Versatz (in Pixeln) der verwendet werden soll um neue Fenster zu ankern"
 L["An Y offset (in pixels) to be used when anchoring new frames."] = "Y-Versatz (in Pixeln) der verwendet werden soll um neue Fenster zu ankern"
+L["Anticipation"] = "Erwartung"
 L["Arcane Charges"] = 'Arkane Aufladungen'
 L["Assist Frames"] = "Assistent Fenster"
 L["Assist Target"] = "Assistent Ziel"
@@ -649,6 +651,7 @@ L["Colored Icon"] = 'Buntes Symbol'
 L["Coloring (Specific)"] = 'Färben (Spezifisch)'
 L["Coloring"] = 'Färben'
 L["Combat Fade"] = "Im Kampf ausblenden"
+L["Combo Point"] = "Kombopunkt"
 L["Combobar"] = "Kombopunkte Leiste"
 L["Configure Auras"] = 'Konfiguriere Auren'
 L["Copy From"] = "Kopieren von"
@@ -675,9 +678,11 @@ L["Destruction"] = "Zerstörung"
 L["Detach From Frame"] = "Vom Fenster lösen"
 L["Detached Width"] = 'Freistehendes Breite'
 L["Direction the health bar moves when gaining/losing health."] = "Richtung in die sich die Lebensleiste aufbaut, wenn man Leben gewinnt oder verliert."
-L["Disable Blizzard"] = "Blizzard deaktivieren"
+L["Disabled Blizzard Frames"] = "Deaktivierte Blizzard Fenster"
 L["Disabled"] = 'Deaktivieren'
-L["Disables the blizzard party/raid frames."] = "Deaktiviere das Gruppen/Schlachtzugsfenster von Blizzard"
+L["Disables the focus and target of focus unitframes."] = "Deaktiviert das Fokus und Fokus-Ziel Einheitenfenster."
+L["Disables the player and pet unitframes."] = "Deaktiviert das Spieler und Begleiter Einheitenfenster."
+L["Disables the target and target of target unitframes."] = "Deaktiviert das Ziel und Ziel des Ziels Einheitenfenster."
 L["Disconnected"] = "Nicht Verbunden"
 L["Display a spark texture at the end of the castbar statusbar to help show the differance between castbar and backdrop."] = "Zeigt eine funkelnde Textur am Ende des Zauberbalken um den Unterschied zwischen Zauberbalken und Hintergrund zu verdeutlichen."
 L["Display druid mana bar when in cat or bear form and when mana is not 100%."] = "Mana des Druiden anzeigen wenn er in Katzen- oder Bärengestalt ist und das Mana nicht 100% ist"
@@ -698,6 +703,7 @@ L["Don't display raid buffs such as Blessing of Kings or Mark of the Wild."] = "
 L["Down"] = "Hinunter"
 L["Druid Mana"] = "Mana des Druiden"
 L["Duration Reverse"] = 'Dauer umkehren'
+L["Duration Text"] = "Dauer Text"
 L["Duration"] = 'Dauer'
 L["Enabling this allows raid-wide sorting however you will not be able to distinguish between groups."] = "Aktivieren dieses Punktes erlaubt Raidweites sortieren, allerdings wirst du nicht zwischen Gruppen unterscheiden können"
 L["Enabling this inverts the grouping order when the raid is not full, this will reverse the direction it starts from."] = "Aktivieren dieses Punktes kehrt die Gruppierungsrichtung um wenn der Raid nicht voll ist, die Startrichtung wird ebenfalls umgekehrt"
@@ -802,6 +808,7 @@ L["Power text will be hidden on NPC targets, in addition the name text will be r
 L["Power"] = "Kraft"
 L["Powers"] = "Kräfte"
 L["Priority"] = "Priorität"
+L["Profile Specific"] = true;
 L["PVP Trinket"] = 'PVP Schmuck'
 L["Raid Icon"] = 'Schlachtzugssymbol'
 L["Raid-Wide Sorting"] = "Raidweite Sortierung"
@@ -848,7 +855,8 @@ L["Spark"] = "Funken"
 L["Spec Icon"] = 'Talentspezialisierungssymbol'
 L["Spell not found in list."] = "Zauber in der Liste nicht gefunden."
 L["Spells"] = 'Zauber'
-L["Stack Threshold"] = "Stack Schwellenwert"
+L["Stack Counter"] = "Stapel Zähler"
+L["Stack Threshold"] = "Stapel Schwellenwert"
 L["Stagger Bar"] = 'Staffel Leiste'
 L["Start Near Center"] = "Starte nahe der Mitte"
 L["StatusBar Texture"] = "Statusleistentextur"
@@ -889,6 +897,7 @@ L["UnitFrames"] = "Einheitenfenster"
 L["Up"] = "Hinauf"
 L["Use Default"] = "Benutze Standard"
 L["Use the custom health backdrop color instead of a multiple of the main health color."] = "Wähle eine eigene Hintergrundfarbe, andernfalls wird die aktuelle Gesundheitsleistenfarbe verwendet."
+L["Use the profile specific filter 'Buff Indicator (Profile)' instead of the global filter 'Buff Indicator'."] = true;
 L["Value must be a number"] = "Der Wert muss eine Zahl sein"
 L["Vertical Spacing"] = "Vertikaler Abstand"
 L["Vertical"] = "Vertikal" --Also used in bags section

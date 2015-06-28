@@ -68,6 +68,12 @@ P['general'] = {
 				['xOffset'] = 8,
 				['yOffset'] = -8,
 			},
+			['vehicleLeave'] = {
+				['size'] = 26,
+				['position'] = "BOTTOMLEFT",
+				['xOffset'] = 2,
+				['yOffset'] = 2,
+			},
 		}
 	},
 
@@ -1470,6 +1476,26 @@ P['unitframe'] = {
 				['enable'] = true,
 				['size'] = 8,
 				['fontSize'] = 10,
+				['profileSpecific'] = false,
+			},
+			['rdebuffs'] = {
+				['enable'] = false,
+				['fontSize'] = 10,
+				['size'] = 26,
+				['xOffset'] = 0,
+				['yOffset'] = 0,
+				['duration'] = {
+					['position'] = "CENTER",
+					['xOffset'] = 0,
+					['yOffset'] = 0,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
+				['stack'] = {
+					['position'] = "BOTTOMRIGHT",
+					['xOffset'] = 0,
+					['yOffset'] = 2,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
 			},
 			['roleIcon'] = {
 				['enable'] = true,
@@ -1609,11 +1635,26 @@ P['unitframe'] = {
 				['enable'] = true,
 				['size'] = 8,
 				['fontSize'] = 10,
+				['profileSpecific'] = false,
 			},
 			['rdebuffs'] = {
 				['enable'] = true,
 				['fontSize'] = 10,
 				['size'] = 26,
+				['xOffset'] = 0,
+				['yOffset'] = 0,
+				['duration'] = {
+					['position'] = "CENTER",
+					['xOffset'] = 0,
+					['yOffset'] = 0,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
+				['stack'] = {
+					['position'] = "BOTTOMRIGHT",
+					['xOffset'] = 0,
+					['yOffset'] = 2,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
 			},
 			['roleIcon'] = {
 				['enable'] = true,
@@ -1725,6 +1766,20 @@ P['unitframe'] = {
 				['enable'] = false,
 				['fontSize'] = 10,
 				['size'] = 22,
+				['xOffset'] = 0,
+				['yOffset'] = 0,
+				['duration'] = {
+					['position'] = "CENTER",
+					['xOffset'] = 0,
+					['yOffset'] = 0,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
+				['stack'] = {
+					['position'] = "BOTTOMRIGHT",
+					['xOffset'] = 0,
+					['yOffset'] = 2,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
 			},
 			['roleIcon'] = {
 				['enable'] = false,
@@ -1739,6 +1794,7 @@ P['unitframe'] = {
 				['enable'] = true,
 				['size'] = 8,
 				['fontSize'] = 10,
+				['profileSpecific'] = false,
 			},
 			['raidicon'] = {
 				['enable'] = true,
@@ -1839,6 +1895,18 @@ P['unitframe'] = {
 				['size'] = 26,
 				['xOffset'] = 0,
 				['yOffset'] = 2,
+				['duration'] = {
+					['position'] = "CENTER",
+					['xOffset'] = 0,
+					['yOffset'] = 0,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
+				['stack'] = {
+					['position'] = "BOTTOMRIGHT",
+					['xOffset'] = 0,
+					['yOffset'] = 2,
+					['color'] = {r = 1, g = 0.9, b = 0}
+				},
 			},
 			['raidicon'] = {
 				['enable'] = true,
@@ -2040,6 +2108,9 @@ P["actionbar"] = {
 		['widthMult'] = 1,
 		["buttonsize"] = 32,
 		["buttonspacing"] = 2,
+		['alpha'] = 1,
+	},
+	['extraActionButton'] = {
 		['alpha'] = 1,
 	},
 };

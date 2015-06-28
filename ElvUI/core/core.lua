@@ -511,6 +511,7 @@ function E:UpdateAll(ignoreInstall)
 	self:SetMoversPositions()
 	self:UpdateMedia()
 	self:UpdateCooldownSettings()
+	if self.RefreshGUI then self:RefreshGUI() end --Refresh Config
 
 	local UF = self:GetModule('UnitFrames')
 	UF.db = self.db.unitframe
@@ -525,6 +526,7 @@ function E:UpdateAll(ignoreInstall)
 	AB.db = self.db.actionbar
 	AB:UpdateButtonSettings()
 	AB:UpdateMicroPositionDimensions()
+	AB:Extra_SetAlpha()
 
 	local bags = E:GetModule('Bags');
 	bags.db = self.db.bags
@@ -532,6 +534,7 @@ function E:UpdateAll(ignoreInstall)
 	bags:Layout(true);
 	bags:PositionBagFrames()
 	bags:SizeAndPositionBagBar()
+	bags:UpdateItemLevelDisplay()
 
 	local totems = E:GetModule('Totems');
 	totems.db = self.db.general.totems
@@ -585,6 +588,7 @@ function E:UpdateAll(ignoreInstall)
 	LO:ToggleChatPanels()
 	LO:BottomPanelVisibility()
 	LO:TopPanelVisibility()
+	LO:SetDataPanelStyle()
 
 	self:GetModule('Blizzard'):ObjectiveFrameHeight()
 

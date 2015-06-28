@@ -3,6 +3,9 @@ local UF = E:GetModule('UnitFrames');
 local _, ns = ...
 local ElvUF = ns.oUF
 
+local tinsert = table.insert
+local twipe = table.wipe
+
 local ACD = LibStub("AceConfigDialog-3.0")
 local fillValues = {
 	['fill'] = L["Filled"],
@@ -56,6 +59,8 @@ local auraBarsSortValues = {
 	['NAME'] = NAME,
 	['NONE'] = NONE,
 }
+
+local CUSTOMTEXT_CONFIGS = {}
 
 -----------------------------------------------------------------------
 -- OPTIONS TABLES
@@ -947,7 +952,7 @@ local function GetOptionsTable_CustomText(updateFunc, groupName, numUnits, order
 			end
 			
 			local frameName = "ElvUF_"..E:StringTitle(groupName)
-			if E.db.unitframe.units[groupName].customTexts[textName] or (_G[frameName] and _G[frameName][textName] or _G[frameName.."Group1UnitButton1"] and _G[frameName.."Group1UnitButton1"][textName]) then
+			if E.db.unitframe.units[groupName].customTexts[textName] or (_G[frameName] and _G[frameName]["customTexts"] and _G[frameName]["customTexts"][textName] or _G[frameName.."Group1UnitButton1"] and _G[frameName.."Group1UnitButton1"]["customTexts"] and _G[frameName.."Group1UnitButton1"][textName]) then
 				E:Print(L["The name you have selected is already in use by another element."])
 				return;
 			end
@@ -1317,9 +1322,14 @@ local function GetOptionsTable_RaidIcon(updateFunc, groupName, numUnits)
 	return config
 end
 
-local tinsert = table.insert
 function UF:CreateCustomTextGroup(unit, objectName)
-	if E.Options.args.unitframe.args[unit].args[objectName] or not E.Options.args.unitframe.args[unit] then return end
+	if not E.Options.args.unitframe.args[unit] then
+		return
+	elseif E.Options.args.unitframe.args[unit].args[objectName] then
+		E.Options.args.unitframe.args[unit].args[objectName].hidden = false -- Re-show existing custom texts which belong to current profile and were previously hidden
+		tinsert(CUSTOMTEXT_CONFIGS, E.Options.args.unitframe.args[unit].args[objectName]) --Register this custom text config to be hidden again on profile change
+		return
+	end
 
 	E.Options.args.unitframe.args[unit].args[objectName] = {
 		order = -1,
@@ -1351,29 +1361,29 @@ function UF:CreateCustomTextGroup(unit, objectName)
 					if unit == 'boss' or unit == 'arena' then
 						for i=1, 5 do
 							if UF[unit..i] then
-								UF[unit..i]:Tag(UF[unit..i][objectName], '');
-								UF[unit..i][objectName]:Hide();
+								UF[unit..i]:Tag(UF[unit..i]["customTexts"][objectName], '');
+								UF[unit..i]["customTexts"][objectName]:Hide();
 							end
 						end
 					elseif unit == 'party' or unit:find('raid') then
 						for i=1, UF[unit]:GetNumChildren() do
 							local child = select(i, UF[unit]:GetChildren())
 							if child.Tag then
-								child:Tag(child[objectName], '');
-								child[objectName]:Hide();
+								child:Tag(child["customTexts"][objectName], '');
+								child["customTexts"][objectName]:Hide();
 							else
 								for x=1, child:GetNumChildren() do
 									local c2 = select(x, child:GetChildren())
 									if(c2.Tag) then
-										c2:Tag(c2[objectName], '');
-										c2[objectName]:Hide();
+										c2:Tag(c2["customTexts"][objectName], '');
+										c2["customTexts"][objectName]:Hide();
 									end
 								end
 							end
 						end
 					elseif UF[unit] then
-						UF[unit]:Tag(UF[unit][objectName], '');
-						UF[unit][objectName]:Hide();
+						UF[unit]:Tag(UF[unit]["customTexts"][objectName], '');
+						UF[unit]["customTexts"][objectName]:Hide();
 					end
 				end,
 			},
@@ -1434,6 +1444,8 @@ function UF:CreateCustomTextGroup(unit, objectName)
 			},
 		},
 	}
+
+	tinsert(CUSTOMTEXT_CONFIGS, E.Options.args.unitframe.args[unit].args[objectName]) --Register this custom text config to be hidden on profile change
 end
 
 E.Options.args.unitframe = {
@@ -1458,20 +1470,60 @@ E.Options.args.unitframe = {
 			disabled = function() return not E.private.unitframe.enable end,
 			set = function(info, value) E.db.unitframe[ info[#info] ] = value; UF:Update_AllFrames() end,
 			args = {
-				generalGroup = {
+				disabledBlizzardFrames = {
 					order = 1,
+					type = "group",
+					guiInline = true,
+					name = L["Disabled Blizzard Frames"],
+					get = function(info) return E.private.unitframe.disabledBlizzardFrames[ info[#info] ] end,
+					set = function(info, value) E.private["unitframe"].disabledBlizzardFrames[ info[#info] ] = value; E:StaticPopup_Show("PRIVATE_RL") end,
+					args = {
+						player = {
+							order = 1,
+							type = 'toggle',
+							name = L["Player Frame"],
+							desc = L["Disables the player and pet unitframes."],
+						},
+						target = {
+							order = 2,
+							type = 'toggle',
+							name = L["Target Frame"],
+							desc = L["Disables the target and target of target unitframes."],
+						},
+						focus = {
+							order = 3,
+							type = 'toggle',
+							name = L["Focus Frame"],
+							desc = L["Disables the focus and target of focus unitframes."],
+						},
+						boss = {
+							order = 4,
+							type = 'toggle',
+							name = L["Boss Frames"],
+						},
+						arena = {
+							order = 5,
+							type = 'toggle',
+							name = L["Arena Frames"],
+						},
+						party = {
+							order = 6,
+							type = 'toggle',
+							name = L["Party Frames"],
+						},
+						raid = {
+							order = 7,
+							type = 'toggle',
+							name = L["Raid Frames"],
+						},
+					},
+				},
+				generalGroup = {
+					order = 2,
 					type = 'group',
 					guiInline = true,
 					name = L["General"],
 					args = {
-						disableBlizzard = {
-							order = 1,
-							name = L["Disable Blizzard"],
-							desc = L["Disables the blizzard party/raid frames."],
-							type = 'toggle',
-							get = function(info) return E.private.unitframe[ info[#info] ] end,
-							set = function(info, value) E.private["unitframe"][ info[#info] ] = value; E:StaticPopup_Show("PRIVATE_RL") end
-						},
 						OORAlpha = {
 							order = 2,
 							name = L["OOR Alpha"],
@@ -1501,7 +1553,7 @@ E.Options.args.unitframe = {
 					},
 				},
 				barGroup = {
-					order = 2,
+					order = 3,
 					type = 'group',
 					guiInline = true,
 					name = L["Bars"],
@@ -1524,7 +1576,7 @@ E.Options.args.unitframe = {
 					},
 				},
 				fontGroup = {
-					order = 3,
+					order = 4,
 					type = 'group',
 					guiInline = true,
 					name = L["Fonts"],
@@ -1562,7 +1614,7 @@ E.Options.args.unitframe = {
 					},
 				},
 				allColorsGroup = {
-					order = 4,
+					order = 5,
 					type = 'group',
 					guiInline = true,
 					name = L["Colors"],
@@ -1751,7 +1803,7 @@ E.Options.args.unitframe = {
 							},
 						},
 						castBars = {
-							order = 9,
+							order = 10,
 							type = 'group',
 							guiInline = true,
 							name = L["Castbar"],
@@ -1796,7 +1848,7 @@ E.Options.args.unitframe = {
 							},
 						},
 						auraBars = {
-							order = 9,
+							order = 11,
 							type = 'group',
 							guiInline = true,
 							name = L["Aura Bars"],
@@ -1879,7 +1931,7 @@ E.Options.args.unitframe = {
 							},
 						},
 						healPrediction = {
-							order = 10,
+							order = 12,
 							name = L["Heal Prediction"],
 							type = 'group',
 							get = function(info)
@@ -1932,6 +1984,16 @@ E.Options.args.unitframe.args.player = {
 			type = 'toggle',
 			order = 1,
 			name = L["Enable"],
+			set = function(info, value) 
+				E.db.unitframe.units['player'][ info[#info] ] = value; 
+				UF:CreateAndUpdateUF('player');
+				LibStub("LibBodyguard-1.0"):UpdateSettings();
+				if value == true and E.db.unitframe.units.player.combatfade then
+					ElvUF_Pet:SetParent(ElvUF_Player)
+				else
+					ElvUF_Pet:SetParent(ElvUF_Parent)
+				end
+			end,
 		},
 		copyFrom = {
 			type = 'select',
@@ -1997,8 +2059,8 @@ E.Options.args.unitframe.args.player = {
 			set = function(info, value)
 				E.db.unitframe.units['player'][ info[#info] ] = value;
 				UF:CreateAndUpdateUF('player');
-
-				if value == true then
+				LibStub("LibBodyguard-1.0"):UpdateSettings();
+				if value == true and E.db.unitframe.units.player.enable then
 					ElvUF_Pet:SetParent(ElvUF_Player)
 				else
 					ElvUF_Pet:SetParent(ElvUF_Parent)
@@ -2057,7 +2119,7 @@ E.Options.args.unitframe.args.player = {
 					type = 'range',
 					order = 2,
 					name = L["Height"],
-					min = 5, max = 15, step = 1,
+					min = 5, max = 30, step = 1,
 				},
 				fill = {
 					type = 'select',
@@ -3368,11 +3430,23 @@ E.Options.args.unitframe.args.party = {
 					order = 4,
 					min = 7, max = 22, step = 1,
 				},
+				profileSpecific = {
+					type = 'toggle',
+					name = L["Profile Specific"],
+					desc = L["Use the profile specific filter 'Buff Indicator (Profile)' instead of the global filter 'Buff Indicator'."],
+					order = 5,
+				},
 				configureButton = {
 					type = 'execute',
 					name = L["Configure Auras"],
-					func = function() E:SetToFilterConfig('Buff Indicator') end,
-					order = 5
+					func = function() 
+						if E.db.unitframe.units['party']['buffIndicator'].profileSpecific then
+							E:SetToFilterConfig('Buff Indicator (Profile)')
+						else
+							E:SetToFilterConfig('Buff Indicator')
+						end
+					end,
+					order = 6
 				},
 			},
 		},
@@ -3430,8 +3504,162 @@ E.Options.args.unitframe.args.party = {
 		name = GetOptionsTable_Name(UF.CreateAndUpdateHeaderGroup, 'party'),
 		buffs = GetOptionsTable_Auras(true, 'buffs', true, UF.CreateAndUpdateHeaderGroup, 'party'),
 		debuffs = GetOptionsTable_Auras(true, 'debuffs', true, UF.CreateAndUpdateHeaderGroup, 'party'),
-		petsGroup = {
+		rdebuffs = {
 			order = 800,
+			type = 'group',
+			name = L["RaidDebuff Indicator"],
+			get = function(info) return E.db.unitframe.units['party']['rdebuffs'][ info[#info] ] end,
+			set = function(info, value) E.db.unitframe.units['party']['rdebuffs'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('party') end,
+			args = {
+				enable = {
+					type = 'toggle',
+					name = L["Enable"],
+					order = 1,
+				},
+				size = {
+					type = 'range',
+					name = L["Size"],
+					order = 2,
+					min = 8, max = 35, step = 1,
+				},
+				fontSize = {
+					type = 'range',
+					name = L["Font Size"],
+					order = 3,
+					min = 7, max = 22, step = 1,
+				},
+				xOffset = {
+					order = 4,
+					type = 'range',
+					name = L["xOffset"],
+					min = -300, max = 300, step = 1,
+				},
+				yOffset = {
+					order = 5,
+					type = 'range',
+					name = L["yOffset"],
+					min = -300, max = 300, step = 1,
+				},
+				configureButton = {
+					type = 'execute',
+					name = L["Configure Auras"],
+					func = function() E:SetToFilterConfig('RaidDebuffs') end,
+					order = 7
+				},
+				duration = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Duration Text"],
+					get = function(info) return E.db.unitframe.units['party']['rdebuffs']['duration'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['party']['rdebuffs']['duration'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('party') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							hasAlpha = false,
+							get = function(info)
+								local c = E.db.unitframe.units.party.rdebuffs.duration.color
+								local d = P.unitframe.units.party.rdebuffs.duration.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.party.rdebuffs.duration.color = {}
+								local c = E.db.unitframe.units.party.rdebuffs.duration.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('party')
+							end,
+						},
+					},
+				},
+				stack = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Stack Counter"],
+					get = function(info) return E.db.unitframe.units['party']['rdebuffs']['stack'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['party']['rdebuffs']['stack'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('party') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							hasAlpha = false,
+							get = function(info)
+								local c = E.db.unitframe.units.party.rdebuffs.stack.color
+								local d = P.unitframe.units.party.rdebuffs.stack.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.party.rdebuffs.stack.color = {}
+								local c = E.db.unitframe.units.party.rdebuffs.stack.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('party')
+							end,
+						},
+					},
+				},
+			},
+		},
+		petsGroup = {
+			order = 850,
 			type = 'group',
 			name = L["Party Pets"],
 			get = function(info) return E.db.unitframe.units['party']['petsGroup'][ info[#info] ] end,
@@ -3882,11 +4110,23 @@ E.Options.args.unitframe.args['raid'] = {
 					order = 4,
 					min = 7, max = 22, step = 1,
 				},
+				profileSpecific = {
+					type = 'toggle',
+					name = L["Profile Specific"],
+					desc = L["Use the profile specific filter 'Buff Indicator (Profile)' instead of the global filter 'Buff Indicator'."],
+					order = 5,
+				},
 				configureButton = {
 					type = 'execute',
 					name = L["Configure Auras"],
-					func = function() E:SetToFilterConfig('Buff Indicator') end,
-					order = 5
+					func = function() 
+						if E.db.unitframe.units['raid']['buffIndicator'].profileSpecific then
+							E:SetToFilterConfig('Buff Indicator (Profile)')
+						else
+							E:SetToFilterConfig('Buff Indicator')
+						end
+					end,
+					order = 6
 				},
 			},
 		},
@@ -3980,6 +4220,114 @@ E.Options.args.unitframe.args['raid'] = {
 					name = L["Configure Auras"],
 					func = function() E:SetToFilterConfig('RaidDebuffs') end,
 					order = 7
+				},
+				duration = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Duration Text"],
+					get = function(info) return E.db.unitframe.units['raid']['rdebuffs']['duration'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['raid']['rdebuffs']['duration'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('raid') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							get = function(info)
+								local c = E.db.unitframe.units.raid.rdebuffs.duration.color
+								local d = P.unitframe.units.raid.rdebuffs.duration.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.raid.rdebuffs.duration.color = {}
+								local c = E.db.unitframe.units.raid.rdebuffs.duration.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('raid')
+							end,
+						},
+					},
+				},
+				stack = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Stack Counter"],
+					get = function(info) return E.db.unitframe.units['raid']['rdebuffs']['stack'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['raid']['rdebuffs']['stack'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('raid') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							get = function(info)
+								local c = E.db.unitframe.units.raid.rdebuffs.stack.color
+								local d = P.unitframe.units.raid.rdebuffs.stack.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.raid.rdebuffs.stack.color = {}
+								local c = E.db.unitframe.units.raid.rdebuffs.stack.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('raid')
+							end,
+						},
+					},
 				},
 			},
 		},
@@ -4267,11 +4615,23 @@ E.Options.args.unitframe.args['raid40'] = {
 					order = 4,
 					min = 7, max = 22, step = 1,
 				},
+				profileSpecific = {
+					type = 'toggle',
+					name = L["Profile Specific"],
+					desc = L["Use the profile specific filter 'Buff Indicator (Profile)' instead of the global filter 'Buff Indicator'."],
+					order = 5,
+				},
 				configureButton = {
 					type = 'execute',
 					name = L["Configure Auras"],
-					func = function() E:SetToFilterConfig('Buff Indicator') end,
-					order = 5
+					func = function() 
+						if E.db.unitframe.units['raid40']['buffIndicator'].profileSpecific then
+							E:SetToFilterConfig('Buff Indicator (Profile)')
+						else
+							E:SetToFilterConfig('Buff Indicator')
+						end
+					end,
+					order = 6
 				},
 			},
 		},
@@ -4365,6 +4725,114 @@ E.Options.args.unitframe.args['raid40'] = {
 					name = L["Configure Auras"],
 					func = function() E:SetToFilterConfig('RaidDebuffs') end,
 					order = 7
+				},
+				duration = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Duration Text"],
+					get = function(info) return E.db.unitframe.units['raid40']['rdebuffs']['duration'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['raid40']['rdebuffs']['duration'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('raid40') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							get = function(info)
+								local c = E.db.unitframe.units.raid40.rdebuffs.duration.color
+								local d = P.unitframe.units.raid40.rdebuffs.duration.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.raid40.rdebuffs.duration.color = {}
+								local c = E.db.unitframe.units.raid40.rdebuffs.duration.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('raid40')
+							end,
+						},
+					},
+				},
+				stack = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Stack Counter"],
+					get = function(info) return E.db.unitframe.units['raid40']['rdebuffs']['stack'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['raid40']['rdebuffs']['stack'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('raid40') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							get = function(info)
+								local c = E.db.unitframe.units.raid40.rdebuffs.stack.color
+								local d = P.unitframe.units.raid40.rdebuffs.stack.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.raid40.rdebuffs.stack.color = {}
+								local c = E.db.unitframe.units.raid40.rdebuffs.stack.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('raid40')
+							end,
+						},
+					},
 				},
 			},
 		},
@@ -4684,6 +5152,114 @@ E.Options.args.unitframe.args.raidpet = {
 					name = L["Configure Auras"],
 					func = function() E:SetToFilterConfig('RaidDebuffs') end,
 					order = 7
+				},
+				duration = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Duration Text"],
+					get = function(info) return E.db.unitframe.units['raidpet']['rdebuffs']['duration'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['raidpet']['rdebuffs']['duration'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('raidpet') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							get = function(info)
+								local c = E.db.unitframe.units.raidpet.rdebuffs.duration.color
+								local d = P.unitframe.units.raidpet.rdebuffs.duration.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.raidpet.rdebuffs.duration.color = {}
+								local c = E.db.unitframe.units.raidpet.rdebuffs.duration.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('raidpet')
+							end,
+						},
+					},
+				},
+				stack = {
+					order = 11,
+					type = "group",
+					guiInline = true,
+					name = L["Stack Counter"],
+					get = function(info) return E.db.unitframe.units['raidpet']['rdebuffs']['stack'][ info[#info] ] end,
+					set = function(info, value) E.db.unitframe.units['raidpet']['rdebuffs']['stack'][ info[#info] ] = value; UF:CreateAndUpdateHeaderGroup('raidpet') end,
+					args = {
+						position = {
+							order = 1,
+							type = "select",
+							name = L["Position"],
+							values = {
+								["TOP"] = "TOP",
+								["LEFT"] = "LEFT",
+								["RIGHT"] = "RIGHT",
+								["BOTTOM"] = "BOTTOM",
+								["CENTER"] = "CENTER",
+								["TOPLEFT"] = "TOPLEFT",
+								["TOPRIGHT"] = "TOPRIGHT",
+								["BOTTOMLEFT"] = "BOTTOMLEFT",
+								["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+							},
+						},
+						xOffset = {
+							order = 2,
+							type = "range",
+							name = L["xOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						yOffset = {
+							order = 3,
+							type = "range",
+							name = L["yOffset"],
+							min = -10, max = 10, step = 1,
+						},
+						color = {
+							order = 4,
+							type = "color",
+							name = L["Color"],
+							get = function(info)
+								local c = E.db.unitframe.units.raidpet.rdebuffs.stack.color
+								local d = P.unitframe.units.raidpet.rdebuffs.stack.color
+								return c.r, c.g, c.b, c.a, d.r, d.g, d.b
+							end,
+							set = function(info, r, g, b)
+								E.db.unitframe.units.raidpet.rdebuffs.stack.color = {}
+								local c = E.db.unitframe.units.raidpet.rdebuffs.stack.color
+								c.r, c.g, c.b = r, g, b
+								UF:CreateAndUpdateHeaderGroup('raidpet')
+							end,
+						},
+					},
 				},
 			},
 		},
@@ -5109,10 +5685,19 @@ if P.unitframe.colors.classResources[E.myclass] then
 end
 
 --Custom Texts
-for unit, _ in pairs(E.db.unitframe.units) do
-	if E.db.unitframe.units[unit].customTexts then
-		for objectName, _ in pairs(E.db.unitframe.units[unit].customTexts) do
-			UF:CreateCustomTextGroup(unit, objectName)
+function E:RefreshCustomTextsConfigs()
+	--Hide any custom texts that don't belong to current profile
+	for _, customText in pairs(CUSTOMTEXT_CONFIGS) do
+		customText.hidden = true
+	end
+	twipe(CUSTOMTEXT_CONFIGS)
+
+	for unit, _ in pairs(E.db.unitframe.units) do
+		if E.db.unitframe.units[unit].customTexts then
+			for objectName, _ in pairs(E.db.unitframe.units[unit].customTexts) do
+				UF:CreateCustomTextGroup(unit, objectName)
+			end
 		end
 	end
 end
+E:RefreshCustomTextsConfigs()

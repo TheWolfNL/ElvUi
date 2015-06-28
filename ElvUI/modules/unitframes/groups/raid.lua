@@ -40,6 +40,7 @@ function UF:Construct_RaidFrames(unitGroup)
 	self.HealPrediction = UF:Construct_HealComm(self)
 	self.GPS = UF:Construct_GPS(self)
 	self.Range = UF:Construct_Range(self)
+	self.customTexts = {}
 
 	UF:Update_StatusBars()
 	UF:Update_FontStrings()
@@ -418,13 +419,23 @@ function UF:Update_RaidFrames(frame, db)
 	--RaidDebuffs
 	do
 		local rdebuffs = frame.RaidDebuffs
+		local stackColor = db.rdebuffs.stack.color
+		local durationColor = db.rdebuffs.duration.color
 		if db.rdebuffs.enable then
 			frame:EnableElement('RaidDebuffs')
 
 			rdebuffs:Size(db.rdebuffs.size)
 			rdebuffs:Point('BOTTOM', frame, 'BOTTOM', db.rdebuffs.xOffset, db.rdebuffs.yOffset)
+			
 			rdebuffs.count:FontTemplate(nil, db.rdebuffs.fontSize, 'OUTLINE')
+			rdebuffs.count:ClearAllPoints()
+			rdebuffs.count:Point(db.rdebuffs.stack.position, db.rdebuffs.stack.xOffset, db.rdebuffs.stack.yOffset)
+			rdebuffs.count:SetTextColor(stackColor.r, stackColor.g, stackColor.b)
+			
 			rdebuffs.time:FontTemplate(nil, db.rdebuffs.fontSize, 'OUTLINE')
+			rdebuffs.time:ClearAllPoints()
+			rdebuffs.time:Point(db.rdebuffs.duration.position, db.rdebuffs.duration.xOffset, db.rdebuffs.duration.yOffset)
+			rdebuffs.time:SetTextColor(durationColor.r, durationColor.g, durationColor.b)
 		else
 			frame:DisableElement('RaidDebuffs')
 			rdebuffs:Hide()
@@ -558,12 +569,19 @@ function UF:Update_RaidFrames(frame, db)
 	UF:UpdateAuraWatch(frame)
 
 	frame:EnableElement('ReadyCheck')
+	
+	for objectName, object in pairs(frame.customTexts) do
+		if (not db.customTexts) or (db.customTexts and not db.customTexts[objectName]) then
+			object:Hide()
+			frame.customTexts[objectName] = nil
+		end
+	end
 
 	if db.customTexts then
 		local customFont = UF.LSM:Fetch("font", UF.db.font)
 		for objectName, _ in pairs(db.customTexts) do
-			if not frame[objectName] then
-				frame[objectName] = frame.RaisedElementParent:CreateFontString(nil, 'OVERLAY')
+			if not frame.customTexts[objectName] then
+				frame.customTexts[objectName] = frame.RaisedElementParent:CreateFontString(nil, 'OVERLAY')
 			end
 
 			local objectDB = db.customTexts[objectName]
@@ -572,11 +590,11 @@ function UF:Update_RaidFrames(frame, db)
 				customFont = UF.LSM:Fetch("font", objectDB.font)
 			end
 
-			frame[objectName]:FontTemplate(customFont, objectDB.size or UF.db.fontSize, objectDB.fontOutline or UF.db.fontOutline)
-			frame:Tag(frame[objectName], objectDB.text_format or '')
-			frame[objectName]:SetJustifyH(objectDB.justifyH or 'CENTER')
-			frame[objectName]:ClearAllPoints()
-			frame[objectName]:SetPoint(objectDB.justifyH or 'CENTER', frame, objectDB.justifyH or 'CENTER', objectDB.xOffset, objectDB.yOffset)
+			frame.customTexts[objectName]:FontTemplate(customFont, objectDB.size or UF.db.fontSize, objectDB.fontOutline or UF.db.fontOutline)
+			frame:Tag(frame.customTexts[objectName], objectDB.text_format or '')
+			frame.customTexts[objectName]:SetJustifyH(objectDB.justifyH or 'CENTER')
+			frame.customTexts[objectName]:ClearAllPoints()
+			frame.customTexts[objectName]:SetPoint(objectDB.justifyH or 'CENTER', frame, objectDB.justifyH or 'CENTER', objectDB.xOffset, objectDB.yOffset)
 		end
 	end
 

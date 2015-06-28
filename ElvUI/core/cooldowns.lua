@@ -95,7 +95,7 @@ function E:CreateCooldownTimer(parent)
 	return timer
 end
 
-function E:OnSetCooldown(start, duration, charges, maxCharges)
+function E:OnSetCooldown(start, duration)
 	if(self.noOCC) then return end
 	local button = self:GetParent()
 
@@ -113,14 +113,6 @@ function E:OnSetCooldown(start, duration, charges, maxCharges)
 			return
 		end
 	end
-
-	if self.timer then
-		if charges and charges > 0 then
-			self.timer:SetAlpha(0)
-		else
-			self.timer:SetAlpha(1)
-		end
-	end
 end
 
 function E:RegisterCooldown(cooldown)
@@ -129,8 +121,8 @@ function E:RegisterCooldown(cooldown)
 	cooldown.isHooked = true
 	cooldown:SetHideCountdownNumbers(true)
 	cooldown.SetHideCountdownNumbers = E.noop
-	--Bling Texture is currently bugged and doesn't hide properly when the cooldown animation finishes
-	--See http://git.tukui.org/Elv/elvui/issues/565
+	--Bling Texture appears to be bugged once more.
+	--It doesn't follow the alpha of the parent, which results in the animation showing on invisible buttons.
 	cooldown:SetDrawBling(false)
 end
 
