@@ -1,6 +1,6 @@
 ﻿local E, L, V, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local B = E:NewModule('Bags', 'AceHook-3.0', 'AceEvent-3.0', 'AceTimer-3.0');
-local Search = LibStub('LibItemSearch-1.2')
+local Search = LibStub('LibItemSearch-1.2-ElvUI')
 
 local len, sub, find, format, floor, abs, gsub = string.len, string.sub, string.find, string.format, math.floor, math.abs, string.gsub
 local tinsert = table.insert
@@ -187,6 +187,26 @@ function B:UpdateItemLevelDisplay()
 	end
 end
 
+function B:UpdateCountDisplay()
+	if E.private.bags.enable ~= true then return; end
+	local color = E.db.bags.countFontColor
+
+	for _, bagFrame in pairs(self.BagFrames) do
+		for _, bagID in ipairs(bagFrame.BagIDs) do
+			for slotID = 1, GetContainerNumSlots(bagID) do
+				local slot = bagFrame.Bags[bagID][slotID]
+				if slot and slot.Count then
+					slot.Count:FontTemplate(E.LSM:Fetch("font", E.db.bags.countFont), E.db.bags.countFontSize, E.db.bags.countFontOutline)
+					slot.Count:SetTextColor(color.r, color.g, color.b)
+				end
+			end
+		end
+		if bagFrame.UpdateAllSlots then
+			bagFrame:UpdateAllSlots()
+		end
+	end
+end
+
 function B:UpdateSlot(bagID, slotID)
 	if (self.Bags[bagID] and self.Bags[bagID].numSlots ~= GetContainerNumSlots(bagID)) or not self.Bags[bagID] or not self.Bags[bagID][slotID] then
 		return;
@@ -358,6 +378,7 @@ function B:Layout(isBank)
 	local holderWidth = ((buttonSize + buttonSpacing) * numContainerColumns) - buttonSpacing;
 	local numContainerRows = 0;
 	local bottomPadding = (containerWidth - holderWidth) / 2;
+	local countColor = E.db.bags.countFontColor
 	f.holderFrame:Width(holderWidth);
 
 	if(isBank) then
@@ -456,6 +477,8 @@ function B:Layout(isBank)
 
 					f.Bags[bagID][slotID].Count:ClearAllPoints();
 					f.Bags[bagID][slotID].Count:Point('BOTTOMRIGHT', 0, 2);
+					f.Bags[bagID][slotID].Count:FontTemplate(E.LSM:Fetch("font", E.db.bags.countFont), E.db.bags.countFontSize, E.db.bags.countFontOutline)
+					f.Bags[bagID][slotID].Count:SetTextColor(countColor.r, countColor.g, countColor.b)
 
 					if not(f.Bags[bagID][slotID].questIcon) then
 						f.Bags[bagID][slotID].questIcon = _G[f.Bags[bagID][slotID]:GetName()..'IconQuestTexture'] or _G[f.Bags[bagID][slotID]:GetName()].IconQuestTexture
@@ -556,6 +579,8 @@ function B:Layout(isBank)
 
 				f.reagentFrame.slots[i].Count:ClearAllPoints();
 				f.reagentFrame.slots[i].Count:Point('BOTTOMRIGHT', 0, 2);
+				f.reagentFrame.slots[i].Count:FontTemplate(E.LSM:Fetch("font", E.db.bags.countFont), E.db.bags.countFontSize, E.db.bags.countFontOutline)
+				f.reagentFrame.slots[i].Count:SetTextColor(countColor.r, countColor.g, countColor.b)
 
 				f.reagentFrame.slots[i].iconTexture = _G[f.reagentFrame.slots[i]:GetName()..'IconTexture'];
 				f.reagentFrame.slots[i].iconTexture:SetInside(f.reagentFrame.slots[i]);
@@ -624,7 +649,7 @@ function B:UpdateReagentSlot(slotID)
 		end
 
 		-- color slot according to item quality
-		if questId and not isActive then
+		if questId and not isActiveQuest then
 			slot:SetBackdropBorderColor(1.0, 0.3, 0.3);
 			slot.questIcon:Show();
 		elseif questId or isQuestItem then
@@ -685,6 +710,8 @@ function B:OnEvent(event, ...)
 		self:UpdateAllSlots()
 	elseif event == 'PLAYERREAGENTBANKSLOTS_CHANGED' then
 		B:UpdateReagentSlot(...)
+	elseif (event == "QUEST_ACCEPTED" or event == "QUEST_REMOVED") and self:IsShown() then
+		self:UpdateAllSlots()
 	end
 end
 
@@ -848,6 +875,8 @@ function B:ContructContainerFrame(name, isBank)
 	f:RegisterEvent('BAG_UPDATE_COOLDOWN')
 	f:RegisterEvent('BAG_UPDATE');
 	f:RegisterEvent('PLAYERBANKSLOTS_CHANGED');
+	f:RegisterEvent("QUEST_ACCEPTED");
+	f:RegisterEvent("QUEST_REMOVED");
 	f:SetMovable(true)
 	f:RegisterForDrag("LeftButton", "RightButton")
 	f:RegisterForClicks("AnyUp");

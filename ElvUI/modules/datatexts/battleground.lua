@@ -3,7 +3,7 @@ local DT = E:GetModule('DataTexts')
 
 local lastPanel
 local displayString = ''
-local classColor = RAID_CLASS_COLORS[E.myclass]
+local classColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass]
 local dataLayout = {
 	['LeftChatDataPanel'] = {
 		['left'] = 10,
@@ -38,6 +38,7 @@ local TOK = 856
 local SSM = 860
 local DG = 935
 local name
+local select = select
 
 function DT:UPDATE_BATTLEFIELD_SCORE()
 	lastPanel = self

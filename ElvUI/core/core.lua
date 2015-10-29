@@ -1,11 +1,15 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local LSM = LibStub("LibSharedMedia-3.0")
+local Masque = LibStub("Masque", true)
 
 local format = string.format
 local find = string.find
 local split = string.split
 local match = string.match
 local twipe = table.wipe
+local tonumber = tonumber
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local CUSTOM_CLASS_COLORS = CUSTOM_CLASS_COLORS
 
 --Constants
 E.myclass = select(2, UnitClass("player"));
@@ -146,7 +150,7 @@ function E:CheckClassColor(r, g, b)
 	local matchFound = false;
 	for class, _ in pairs(RAID_CLASS_COLORS) do
 		if class ~= E.myclass then
-			local colorTable = class == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[class]
+			local colorTable = class == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class] or RAID_CLASS_COLORS[class])
 			if colorTable.r == r and colorTable.g == g and colorTable.b == b then
 				matchFound = true;
 			end
@@ -173,8 +177,7 @@ function E:UpdateMedia()
 
 	--Fonts
 	self["media"].normFont = LSM:Fetch("font", self.db['general'].font)
-	self["media"].combatFont = LSM:Fetch("font", self.db['general'].dmgfont)
-
+	self["media"].combatFont = LSM:Fetch("font", self.private['general'].dmgfont)
 
 	--Textures
 	self["media"].blankTex = LSM:Fetch("background", "ElvUI Blank")
@@ -184,7 +187,7 @@ function E:UpdateMedia()
 	--Border Color
 	local border = E.db['general'].bordercolor
 	if self:CheckClassColor(border.r, border.g, border.b) then
-		classColor = E.myclass == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[E.myclass]
+		classColor = E.myclass == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
 		E.db['general'].bordercolor.r = classColor.r
 		E.db['general'].bordercolor.g = classColor.g
 		E.db['general'].bordercolor.b = classColor.b
@@ -203,7 +206,7 @@ function E:UpdateMedia()
 	local value = self.db['general'].valuecolor
 
 	if self:CheckClassColor(value.r, value.g, value.b) then
-		value = E.myclass == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[E.myclass]
+		value = E.myclass == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
 		self.db['general'].valuecolor.r = value.r
 		self.db['general'].valuecolor.g = value.g
 		self.db['general'].valuecolor.b = value.b
@@ -231,6 +234,37 @@ local function LSMCallback()
 	E:UpdateMedia()
 end
 E.LSM.RegisterCallback(E, "LibSharedMedia_Registered", LSMCallback)
+
+local MasqueGroupState = {}
+local MasqueGroupToTableElement = {
+	["ActionBars"] = {"actionbar", "actionbars"},
+	["Pet Bar"] = {"actionbar", "petBar"},
+	["Stance Bar"] = {"actionbar", "stanceBar"},
+	["Buffs"] = {"auras", "buffs"},
+	["Debuffs"] = {"auras", "debuffs"},
+	["Consolidated Buffs"] = {"auras", "consolidatedBuffs"},
+}
+
+local function MasqueCallback(Addon, Group, SkinID, Gloss, Backdrop, Colors, Disabled)
+	if not E.private then return; end
+	local element = MasqueGroupToTableElement[Group]
+
+	if element then
+		if Disabled then
+			if E.private[element[1]].masque[element[2]] and MasqueGroupState[Group] == "enabled" then
+				E.private[element[1]].masque[element[2]] = false
+				E:StaticPopup_Show("CONFIG_RL")
+			end
+			MasqueGroupState[Group] = "disabled"
+		else
+			MasqueGroupState[Group] = "enabled"
+		end
+	end
+end
+
+if Masque then
+	Masque:Register("ElvUI", MasqueCallback)
+end
 
 function E:RequestBGInfo()
 	RequestBattlefieldScoreData()
@@ -535,6 +569,7 @@ function E:UpdateAll(ignoreInstall)
 	bags:PositionBagFrames()
 	bags:SizeAndPositionBagBar()
 	bags:UpdateItemLevelDisplay()
+	bags:UpdateCountDisplay()
 
 	local totems = E:GetModule('Totems');
 	totems.db = self.db.general.totems
@@ -718,6 +753,7 @@ function E:DBConversions()
 		end
 	end
 	
+	--Add missing Stack Threshold
 	if E.global.unitframe['aurafilters']['RaidDebuffs'].spells then
 		local matchFound
 		for k, v in pairs(E.global.unitframe['aurafilters']['RaidDebuffs'].spells) do
@@ -732,6 +768,19 @@ function E:DBConversions()
 			
 			if not matchFound then
 				E.global.unitframe['aurafilters']['RaidDebuffs']['spells'][k].stackThreshold = 0
+			end
+		end
+	end
+	
+	--Convert spellIDs saved as strings to numbers
+	if E.global.unitframe['aurafilters']['Whitelist (Strict)'].spells then
+		for k, v in pairs(E.global.unitframe['aurafilters']['Whitelist (Strict)'].spells) do
+			if type(v) == 'table' then
+				for k_,v_ in pairs(v) do
+					if k_ == 'spellID' and type(v_) == "string" and tonumber(v_) then
+						E.global.unitframe['aurafilters']['Whitelist (Strict)']['spells'][k].spellID = tonumber(v_)
+					end
+				end
 			end
 		end
 	end
@@ -750,6 +799,12 @@ function E:DBConversions()
 		E.db.general.reputation.height = P.general.reputation.height
 		E:Print("Reputation bar appears to be an odd shape. Resetting to default size.")
 	end
+	
+	--Turns out that a chat height lower than 58 will cause the following error: Message: ..\FrameXML\FloatingChatFrame.lua line 1147: attempt to perform arithmetic on a nil value
+	--This only happens if the datatext panel for the respective chat panel is enabled, leaving no room for the chat frame.
+	--Minimum height has been increased to 60, convert any setting lower than this to the new minimum height.
+	if E.db.chat.panelHeight < 60 then E.db.chat.panelHeight = 60 end
+	if E.db.chat.panelHeightRight < 60 then E.db.chat.panelHeightRight = 60 end
 end
 
 function E:StopHarlemShake()

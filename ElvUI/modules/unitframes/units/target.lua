@@ -6,11 +6,14 @@ assert(ElvUF, "ElvUI was unable to locate oUF.")
 
 local ceil = math.ceil
 local tinsert = table.insert
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local CUSTOM_CLASS_COLORS = CUSTOM_CLASS_COLORS
+
 function UF:Construct_TargetFrame(frame)
 	frame.Health = self:Construct_HealthBar(frame, true, true, 'RIGHT')
 	frame.Health.frequentUpdates = true;
 
-	frame.Power = self:Construct_PowerBar(frame, true, true, 'LEFT', false)
+	frame.Power = self:Construct_PowerBar(frame, true, true, 'LEFT')
 	frame.Power.frequentUpdates = true;
 
 	frame.Name = self:Construct_NameText(frame)
@@ -29,6 +32,7 @@ function UF:Construct_TargetFrame(frame)
 	frame.CPoints = self:Construct_Combobar(frame)
 	frame.HealPrediction = self:Construct_HealComm(frame)
 	frame.DebuffHighlight = self:Construct_DebuffHighlight(frame)
+	frame.GPS = self:Construct_GPS(frame)
 
 	frame.AuraBars = self:Construct_AuraBarHeader(frame)
 	frame.Range = UF:Construct_Range(frame)
@@ -161,16 +165,7 @@ function UF:Update_TargetFrame(frame, db)
 			health:Point("BOTTOMLEFT", frame, "BOTTOMLEFT", BORDER, (USE_POWERBAR and ((BORDER + SPACING)*2) or BORDER) + POWERBAR_HEIGHT)
 		end
 
-		health.bg:ClearAllPoints()
-		if not USE_PORTRAIT_OVERLAY then
-			health:Point("TOPRIGHT", -(PORTRAIT_WIDTH+BORDER), -BORDER)
-			health.bg:SetParent(health)
-			health.bg:SetAllPoints()
-		else
-			health.bg:Point('BOTTOMLEFT', health:GetStatusBarTexture(), 'BOTTOMRIGHT')
-			health.bg:Point('TOPRIGHT', health)
-			health.bg:SetParent(frame.Portrait.overlay)
-		end
+		health.bgFrame:SetParent(frame.Portrait.overlay) --we toggle between two differant frames when switching between 3d and 2d
 	end
 
 	--Name
@@ -219,7 +214,7 @@ function UF:Update_TargetFrame(frame, db)
 				if not power.mover then
 					power:ClearAllPoints()
 					power:Point("BOTTOM", frame, "BOTTOM", 0, -20)
-					E:CreateMover(power, 'TargetPowerBarMover', 'Target Powerbar', nil, nil, nil, 'ALL,SOLO')
+					E:CreateMover(power, 'TargetPowerBarMover', L["Target Powerbar"], nil, nil, nil, 'ALL,SOLO')
 				else
 					power:ClearAllPoints()
 					power:SetPoint("BOTTOMLEFT", power.mover, "BOTTOMLEFT")
@@ -249,6 +244,13 @@ function UF:Update_TargetFrame(frame, db)
 			else
 				power:Point("TOPLEFT", frame.Health.backdrop, "BOTTOMLEFT", BORDER, -(E.PixelMode and 0 or (BORDER + SPACING)))
 				power:Point("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(BORDER + PORTRAIT_WIDTH), BORDER)
+			end
+
+			if db.power.strataAndLevel.useCustomStrata then
+				power:SetFrameStrata(db.power.strataAndLevel.frameStrata)
+			end
+			if db.power.strataAndLevel.useCustomLevel then
+				power:SetFrameLevel(db.power.strataAndLevel.frameLevel)
 			end
 		elseif frame:IsElementEnabled('Power') then
 			frame:DisableElement('Power')
@@ -323,7 +325,7 @@ function UF:Update_TargetFrame(frame, db)
 				threat.glow:Point("BOTTOMLEFT", frame.Power.backdrop, "BOTTOMLEFT", -SHADOW_SPACING, -SHADOW_SPACING)
 				threat.glow:Point("BOTTOMRIGHT", frame.Power.backdrop, "BOTTOMRIGHT", SHADOW_SPACING, -SHADOW_SPACING)
 
-				if USE_MINI_POWERBAR or USE_POWERBAR_OFFSET or USE_INSET_POWERBAR then
+				if USE_MINI_POWERBAR or USE_POWERBAR_OFFSET or USE_INSET_POWERBAR or POWERBAR_DETACHED then
 					threat.glow:Point("BOTTOMLEFT", frame.Health.backdrop, "BOTTOMLEFT", -SHADOW_SPACING, -SHADOW_SPACING)
 					threat.glow:Point("BOTTOMRIGHT", frame.Health.backdrop, "BOTTOMRIGHT", SHADOW_SPACING, -SHADOW_SPACING)
 				end
@@ -390,6 +392,12 @@ function UF:Update_TargetFrame(frame, db)
 		buffs["growth-x"] = db.buffs.anchorPoint == 'LEFT' and 'LEFT' or  db.buffs.anchorPoint == 'RIGHT' and 'RIGHT' or (db.buffs.anchorPoint:find('LEFT') and 'RIGHT' or 'LEFT')
 		buffs.initialAnchor = E.InversePoints[db.buffs.anchorPoint]
 
+		buffs.attachTo = attachTo
+		buffs.point = E.InversePoints[db.buffs.anchorPoint]
+		buffs.anchorPoint = db.buffs.anchorPoint
+		buffs.xOffset = x + db.buffs.xOffset
+		buffs.yOffset = y + db.buffs.yOffset + (E.PixelMode and (db.buffs.anchorPoint:find('TOP') and -1 or 1) or 0)
+
 		if db.buffs.enable then
 			buffs:Show()
 			UF:UpdateAuraIconSettings(buffs)
@@ -426,6 +434,12 @@ function UF:Update_TargetFrame(frame, db)
 		debuffs["growth-x"] = db.debuffs.anchorPoint == 'LEFT' and 'LEFT' or  db.debuffs.anchorPoint == 'RIGHT' and 'RIGHT' or (db.debuffs.anchorPoint:find('LEFT') and 'RIGHT' or 'LEFT')
 		debuffs.initialAnchor = E.InversePoints[db.debuffs.anchorPoint]
 
+		debuffs.attachTo = attachTo
+		debuffs.point = E.InversePoints[db.debuffs.anchorPoint]
+		debuffs.anchorPoint = db.debuffs.anchorPoint
+		debuffs.xOffset = x + db.debuffs.xOffset
+		debuffs.yOffset = y + db.debuffs.yOffset
+
 		if db.debuffs.enable then
 			debuffs:Show()
 			UF:UpdateAuraIconSettings(debuffs)
@@ -434,6 +448,33 @@ function UF:Update_TargetFrame(frame, db)
 		end
 	end
 
+	--Smart Aura Position
+	do
+		local position = db.smartAuraPosition
+
+		if position == "BUFFS_ON_DEBUFFS" then
+			if db.debuffs.attachTo == "BUFFS" then
+				E:Print(format(L["This setting caused a conflicting anchor point, where '%s' would be attached to itself. Please check your anchor points. Setting '%s' to be attached to '%s'."], L["Buffs"], L["Debuffs"], L["Frame"]))
+				db.debuffs.attachTo = "FRAME"
+				frame.Debuffs.attachTo = frame
+			end
+			frame.Buffs.PostUpdate = nil
+			frame.Debuffs.PostUpdate = UF.UpdateBuffsHeaderPosition
+		elseif position == "DEBUFFS_ON_BUFFS" then
+			if db.buffs.attachTo == "DEBUFFS" then
+				E:Print(format(L["This setting caused a conflicting anchor point, where '%s' would be attached to itself. Please check your anchor points. Setting '%s' to be attached to '%s'."], L["Debuffs"], L["Buffs"], L["Frame"]))
+				db.buffs.attachTo = "FRAME"
+				frame.Buffs.attachTo = frame
+			end
+			frame.Buffs.PostUpdate = UF.UpdateDebuffsHeaderPosition
+			frame.Debuffs.PostUpdate = nil
+		else
+			frame.Buffs.PostUpdate = nil
+			frame.Debuffs.PostUpdate = nil
+		end
+	end
+
+	--Castbar
 	do
 		local castbar = frame.Castbar
 		castbar:Width(db.castbar.width - (BORDER * 2))
@@ -574,9 +615,16 @@ function UF:Update_TargetFrame(frame, db)
 	--Debuff Highlight
 	do
 		local dbh = frame.DebuffHighlight
-		if E.db.unitframe.debuffHighlighting then
+		if E.db.unitframe.debuffHighlighting ~= 'NONE' then
 			if not frame:IsElementEnabled('DebuffHighlight') then
 				frame:EnableElement('DebuffHighlight')
+				frame.DebuffHighlightFilterTable = E.global.unitframe.DebuffHighlightColors
+				if E.db.unitframe.debuffHighlighting == 'GLOW' then
+					frame.DebuffHighlightBackdrop = true
+					frame.DBHGlow:SetAllPoints(frame.Threat.glow)
+				else
+					frame.DebuffHighlightBackdrop = false
+				end
 			end
 		else
 			if frame:IsElementEnabled('DebuffHighlight') then
@@ -613,6 +661,26 @@ function UF:Update_TargetFrame(frame, db)
 		end
 	end
 
+	--GPSArrow
+	do
+		local GPS = frame.GPS
+		if db.GPSArrow.enable then
+			if not frame:IsElementEnabled('GPS') then
+				frame:EnableElement('GPS')
+			end
+
+			GPS:Size(db.GPSArrow.size)
+			GPS.onMouseOver = db.GPSArrow.onMouseOver
+			GPS.outOfRange = db.GPSArrow.outOfRange
+
+			GPS:SetPoint("CENTER", frame, "CENTER", db.GPSArrow.xOffset, db.GPSArrow.yOffset)
+		else
+			if frame:IsElementEnabled('GPS') then
+				frame:DisableElement('GPS')
+			end
+		end
+	end
+
 	--Raid Icon
 	do
 		local RI = frame.RaidIcon
@@ -641,17 +709,18 @@ function UF:Update_TargetFrame(frame, db)
 			auraBars:Show()
 			auraBars.friendlyAuraType = db.aurabar.friendlyAuraType
 			auraBars.enemyAuraType = db.aurabar.enemyAuraType
+			auraBars.scaleTime = db.aurabar.uniformThreshold
 
 			local buffColor = UF.db.colors.auraBarBuff
 			local debuffColor = UF.db.colors.auraBarDebuff
 			local attachTo = frame
 
 			if(E:CheckClassColor(buffColor.r, buffColor.g, buffColor.b)) then
-				buffColor = E.myclass == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[E.myclass]
+				buffColor = E.myclass == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
 			end
 
 			if(E:CheckClassColor(debuffColor.r, debuffColor.g, debuffColor.b)) then
-				debuffColor = E.myclass == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[E.myclass]
+				debuffColor = E.myclass == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
 			end
 
 			if db.aurabar.attachTo == 'BUFFS' then
@@ -762,9 +831,9 @@ function UF:Update_TargetFrame(frame, db)
 	end
 
 	if UF.db.colors.transparentHealth then
-		UF:ToggleTransparentStatusBar(true, frame.Health, frame.Health.bg)
+		UF:ToggleTransparentStatusBar(true, frame.Health, nil)
 	else
-		UF:ToggleTransparentStatusBar(false, frame.Health, frame.Health.bg, (USE_PORTRAIT and USE_PORTRAIT_OVERLAY) ~= true)
+		UF:ToggleTransparentStatusBar(false, frame.Health, nil, (USE_PORTRAIT and USE_PORTRAIT_OVERLAY) ~= true)
 	end
 
 	UF:ToggleTransparentStatusBar(UF.db.colors.transparentPower, frame.Power, frame.Power.bg)

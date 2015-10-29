@@ -105,7 +105,7 @@ function AddOn:PLAYER_REGEN_DISABLED()
 	local err = false;
 
 	if IsAddOnLoaded("ElvUI_Config") then
-		local ACD = LibStub("AceConfigDialog-3.0")
+		local ACD = LibStub("AceConfigDialog-3.0-ElvUI")
 
 		if ACD.OpenFrames[AddOnName] then
 			self:RegisterEvent('PLAYER_REGEN_ENABLED');
@@ -163,7 +163,7 @@ function AddOn:ToggleConfig()
 				self:Print("|cffff0000Error -- Addon 'ElvUI_Config' not found or is disabled.|r")
 				return
 			end
-			if GetAddOnMetadata("ElvUI_Config", "Version") ~= "1.01" then
+			if GetAddOnMetadata("ElvUI_Config", "Version") ~= "1.02" then
 				self:StaticPopup_Show("CLIENT_UPDATE_REQUEST")
 			end
 		else
@@ -172,7 +172,7 @@ function AddOn:ToggleConfig()
 		end
 	end
 
-	local ACD = LibStub("AceConfigDialog-3.0")
+	local ACD = LibStub("AceConfigDialog-3.0-ElvUI")
 
 	local mode = 'Close'
 	if not ACD.OpenFrames[AddOnName] then

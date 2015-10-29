@@ -6,20 +6,23 @@ local ElvUF = ns.oUF
 assert(ElvUF, "ElvUI was unable to locate oUF.")
 
 local CAN_HAVE_CLASSBAR = (E.myclass == "PALADIN" or E.myclass == "DRUID" or E.myclass == "DEATHKNIGHT" or E.myclass == "WARLOCK" or E.myclass == "PRIEST" or E.myclass == "MONK" or E.myclass == 'MAGE' or E.myclass == 'ROGUE')
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local CUSTOM_CLASS_COLORS = CUSTOM_CLASS_COLORS
 
 function UF:Construct_PlayerFrame(frame)
 	frame.Threat = self:Construct_Threat(frame, true)
 
+	frame.Portrait3D = self:Construct_Portrait(frame, 'model')
+	frame.Portrait2D = self:Construct_Portrait(frame, 'texture')
+
 	frame.Health = self:Construct_HealthBar(frame, true, true, 'RIGHT')
 	frame.Health.frequentUpdates = true;
 
-	frame.Power = self:Construct_PowerBar(frame, true, true, 'LEFT', true)
+	frame.Power = self:Construct_PowerBar(frame, true, true, 'LEFT')
 	frame.Power.frequentUpdates = true;
 
 	frame.Name = self:Construct_NameText(frame)
 
-	frame.Portrait3D = self:Construct_Portrait(frame, 'model')
-	frame.Portrait2D = self:Construct_Portrait(frame, 'texture')
 
 	frame.Buffs = self:Construct_Buffs(frame)
 
@@ -65,7 +68,7 @@ function UF:Construct_PlayerFrame(frame)
 	frame.AuraBars = self:Construct_AuraBarHeader(frame)
 
 	frame.CombatFade = true
-	
+
 	frame.customTexts = {}
 
 	frame:Point('BOTTOMLEFT', E.UIParent, 'BOTTOM', -413, 68) --Set to default position
@@ -82,6 +85,7 @@ function UF:UpdatePlayerFrameAnchors(frame, isShown)
 	local USE_PORTRAIT = db.portrait.enable
 	local USE_PORTRAIT_OVERLAY = db.portrait.overlay and USE_PORTRAIT
 	local CLASSBAR_HEIGHT = db.classbar.height
+	local CLASSBAR_HEIGHT_SPACING
 	local USE_CLASSBAR = db.classbar.enable
 	local USE_MINI_CLASSBAR = db.classbar.fill == "spaced" and USE_CLASSBAR
 	local USE_POWERBAR = db.power.enable
@@ -109,8 +113,10 @@ function UF:UpdatePlayerFrameAnchors(frame, isShown)
 		CLASSBAR_HEIGHT = CLASSBAR_HEIGHT / 2
 	end
 
+	CLASSBAR_HEIGHT_SPACING = CLASSBAR_HEIGHT + SPACING
+
 	if db.classbar.detachFromFrame then
-		CLASSBAR_HEIGHT = E.PixelMode and 0 or -1 --Easiest way to counter the 1px difference SPACING introduces
+		CLASSBAR_HEIGHT_SPACING = 0
 	end
 
 	if USE_STAGGER then
@@ -130,16 +136,16 @@ function UF:UpdatePlayerFrameAnchors(frame, isShown)
 	end
 
 	if isShown then
-		if db.power.offset ~= 0 then
-			health:Point("TOPRIGHT", frame, "TOPRIGHT", -(BORDER+db.power.offset) - STAGGER_WIDTH, -(BORDER + CLASSBAR_HEIGHT + SPACING))
+		if POWERBAR_OFFSET ~= 0 then
+			health:Point("TOPRIGHT", frame, "TOPRIGHT", -(BORDER+POWERBAR_OFFSET) - STAGGER_WIDTH, -(BORDER + CLASSBAR_HEIGHT_SPACING))
 		else
-			health:Point("TOPRIGHT", frame, "TOPRIGHT", -BORDER - STAGGER_WIDTH, -(BORDER + CLASSBAR_HEIGHT + SPACING))
+			health:Point("TOPRIGHT", frame, "TOPRIGHT", -BORDER - STAGGER_WIDTH, -(BORDER + CLASSBAR_HEIGHT_SPACING))
 		end
-		health:Point("TOPLEFT", frame, "TOPLEFT", PORTRAIT_WIDTH + BORDER, -(BORDER + CLASSBAR_HEIGHT + SPACING))
+		health:Point("TOPLEFT", frame, "TOPLEFT", PORTRAIT_WIDTH + BORDER, -(BORDER + CLASSBAR_HEIGHT_SPACING))
 
 		local mini_classbarY = 0
 		if USE_MINI_CLASSBAR then
-			mini_classbarY = -(SPACING+(CLASSBAR_HEIGHT))
+			mini_classbarY = -(CLASSBAR_HEIGHT_SPACING)
 		end
 
 		if db.threatStyle == "GLOW" then
@@ -165,7 +171,7 @@ function UF:UpdatePlayerFrameAnchors(frame, isShown)
 			local portrait = frame.Portrait
 			portrait.backdrop:ClearAllPoints()
 			if USE_MINI_CLASSBAR and USE_CLASSBAR then
-				portrait.backdrop:Point("TOPLEFT", frame, "TOPLEFT", 0, -(CLASSBAR_HEIGHT + SPACING))
+				portrait.backdrop:Point("TOPLEFT", frame, "TOPLEFT", 0, -CLASSBAR_HEIGHT_SPACING)
 			else
 				portrait.backdrop:SetPoint("TOPLEFT", frame, "TOPLEFT")
 			end
@@ -177,8 +183,8 @@ function UF:UpdatePlayerFrameAnchors(frame, isShown)
 			end
 		end
 	else
-		if db.power.offset ~= 0 then
-			health:Point("TOPRIGHT", frame, "TOPRIGHT", -(BORDER + db.power.offset) - STAGGER_WIDTH, -BORDER)
+		if POWERBAR_OFFSET ~= 0 then
+			health:Point("TOPRIGHT", frame, "TOPRIGHT", -(BORDER + POWERBAR_OFFSET) - STAGGER_WIDTH, -BORDER)
 		else
 			health:Point("TOPRIGHT", frame, "TOPRIGHT", -BORDER - STAGGER_WIDTH, -BORDER)
 		end
@@ -202,7 +208,7 @@ function UF:UpdatePlayerFrameAnchors(frame, isShown)
 			end
 		end
 
-		if db.portrait.enable and not USE_PORTRAIT_OVERLAY and frame.Portrait then
+		if USE_PORTRAIT and not USE_PORTRAIT_OVERLAY and frame.Portrait then
 			local portrait = frame.Portrait
 			portrait.backdrop:ClearAllPoints()
 			portrait.backdrop:Point("TOPLEFT", frame, "TOPLEFT")
@@ -345,6 +351,17 @@ function UF:Update_PlayerFrame(frame, db)
 		end
 	end
 
+	--Combat Icon
+	do
+		local cIcon = frame.Combat
+		if db.combatIcon and not frame:IsElementEnabled('Combat') then
+			frame:EnableElement('Combat')
+		elseif not db.combatIcon and frame:IsElementEnabled('Combat') then
+			frame:DisableElement('Combat')
+			cIcon:Hide()
+		end
+	end
+
 	--Health
 	do
 		local health = frame.Health
@@ -393,16 +410,6 @@ function UF:Update_PlayerFrame(frame, db)
 			health:Point("BOTTOMLEFT", frame, "BOTTOMLEFT", BORDER, (USE_POWERBAR and ((BORDER + SPACING)*2) or BORDER) + POWERBAR_HEIGHT)
 		end
 
-		health.bg:ClearAllPoints()
-		if not USE_PORTRAIT_OVERLAY then
-			health:Point("TOPLEFT", PORTRAIT_WIDTH+BORDER, -BORDER)
-			health.bg:SetParent(health)
-			health.bg:SetAllPoints()
-		else
-			health.bg:Point('BOTTOMLEFT', health:GetStatusBarTexture(), 'BOTTOMRIGHT')
-			health.bg:Point('TOPRIGHT', health)
-			health.bg:SetParent(frame.Portrait.overlay)
-		end
 
 		if USE_CLASSBAR and not db.classbar.detachFromFrame then
 			local DEPTH
@@ -420,6 +427,8 @@ function UF:Update_PlayerFrame(frame, db)
 
 			health:Point("TOPLEFT", frame, "TOPLEFT", PORTRAIT_WIDTH+BORDER, DEPTH)
 		end
+
+		health.bgFrame:SetParent(frame.Portrait.overlay) --we toggle between two differant frames when switching between 3d and 2d
 	end
 
 	--Name
@@ -479,7 +488,7 @@ function UF:Update_PlayerFrame(frame, db)
 				if not power.mover then
 					power:ClearAllPoints()
 					power:Point("BOTTOM", frame, "BOTTOM", 0, -20)
-					E:CreateMover(power, 'PlayerPowerBarMover', 'Player Powerbar', nil, nil, nil, 'ALL,SOLO')
+					E:CreateMover(power, 'PlayerPowerBarMover', L["Player Powerbar"], nil, nil, nil, 'ALL,SOLO')
 				else
 					power:ClearAllPoints()
 					power:SetPoint("BOTTOMLEFT", power.mover, "BOTTOMLEFT")
@@ -510,6 +519,14 @@ function UF:Update_PlayerFrame(frame, db)
 				power:Point("TOPLEFT", frame.Health.backdrop, "BOTTOMLEFT", BORDER, -(E.PixelMode and 0 or (BORDER + SPACING)))
 				power:Point("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -BORDER, BORDER)
 			end
+
+			if db.power.strataAndLevel.useCustomStrata then
+				power:SetFrameStrata(db.power.strataAndLevel.frameStrata)
+			end
+			if db.power.strataAndLevel.useCustomLevel then
+				power:SetFrameLevel(db.power.strataAndLevel.frameLevel)
+			end
+
 		elseif frame:IsElementEnabled('Power') then
 			frame:DisableElement('Power')
 			power:Hide()
@@ -621,6 +638,12 @@ function UF:Update_PlayerFrame(frame, db)
 		buffs["growth-x"] = db.buffs.anchorPoint == 'LEFT' and 'LEFT' or  db.buffs.anchorPoint == 'RIGHT' and 'RIGHT' or (db.buffs.anchorPoint:find('LEFT') and 'RIGHT' or 'LEFT')
 		buffs.initialAnchor = E.InversePoints[db.buffs.anchorPoint]
 
+		buffs.attachTo = attachTo
+		buffs.point = E.InversePoints[db.buffs.anchorPoint]
+		buffs.anchorPoint = db.buffs.anchorPoint
+		buffs.xOffset = x + db.buffs.xOffset
+		buffs.yOffset = y + db.buffs.yOffset + (E.PixelMode and (db.buffs.anchorPoint:find('TOP') and -1 or 1) or 0)
+
 		if db.buffs.enable then
 			buffs:Show()
 			UF:UpdateAuraIconSettings(buffs)
@@ -657,11 +680,43 @@ function UF:Update_PlayerFrame(frame, db)
 		debuffs["growth-x"] = db.debuffs.anchorPoint == 'LEFT' and 'LEFT' or  db.debuffs.anchorPoint == 'RIGHT' and 'RIGHT' or (db.debuffs.anchorPoint:find('LEFT') and 'RIGHT' or 'LEFT')
 		debuffs.initialAnchor = E.InversePoints[db.debuffs.anchorPoint]
 
+		debuffs.attachTo = attachTo
+		debuffs.point = E.InversePoints[db.debuffs.anchorPoint]
+		debuffs.anchorPoint = db.debuffs.anchorPoint
+		debuffs.xOffset = x + db.debuffs.xOffset
+		debuffs.yOffset = y + db.debuffs.yOffset
+
 		if db.debuffs.enable then
 			debuffs:Show()
 			UF:UpdateAuraIconSettings(debuffs)
 		else
 			debuffs:Hide()
+		end
+	end
+
+	--Smart Aura Position
+	do
+		local position = db.smartAuraPosition
+
+		if position == "BUFFS_ON_DEBUFFS" then
+			if db.debuffs.attachTo == "BUFFS" then
+				E:Print(format(L["This setting caused a conflicting anchor point, where '%s' would be attached to itself. Please check your anchor points. Setting '%s' to be attached to '%s'."], L["Buffs"], L["Debuffs"], L["Frame"]))
+				db.debuffs.attachTo = "FRAME"
+				frame.Debuffs.attachTo = frame
+			end
+			frame.Buffs.PostUpdate = nil
+			frame.Debuffs.PostUpdate = UF.UpdateBuffsHeaderPosition
+		elseif position == "DEBUFFS_ON_BUFFS" then
+			if db.buffs.attachTo == "DEBUFFS" then
+				E:Print(format(L["This setting caused a conflicting anchor point, where '%s' would be attached to itself. Please check your anchor points. Setting '%s' to be attached to '%s'."], L["Debuffs"], L["Buffs"], L["Frame"]))
+				db.buffs.attachTo = "FRAME"
+				frame.Buffs.attachTo = frame
+			end
+			frame.Buffs.PostUpdate = UF.UpdateDebuffsHeaderPosition
+			frame.Debuffs.PostUpdate = nil
+		else
+			frame.Buffs.PostUpdate = nil
+			frame.Debuffs.PostUpdate = nil
 		end
 	end
 
@@ -872,8 +927,15 @@ function UF:Update_PlayerFrame(frame, db)
 	--Debuff Highlight
 	do
 		local dbh = frame.DebuffHighlight
-		if E.db.unitframe.debuffHighlighting then
+		if E.db.unitframe.debuffHighlighting ~= 'NONE' then
 			frame:EnableElement('DebuffHighlight')
+			frame.DebuffHighlightFilterTable = E.global.unitframe.DebuffHighlightColors
+			if E.db.unitframe.debuffHighlighting == 'GLOW' then
+				frame.DebuffHighlightBackdrop = true
+				frame.DBHGlow:SetAllPoints(frame.Threat.glow)
+			else
+				frame.DebuffHighlightBackdrop = false
+			end
 		else
 			frame:DisableElement('DebuffHighlight')
 		end
@@ -935,17 +997,18 @@ function UF:Update_PlayerFrame(frame, db)
 			auraBars:Show()
 			auraBars.friendlyAuraType = db.aurabar.friendlyAuraType
 			auraBars.enemyAuraType = db.aurabar.enemyAuraType
+			auraBars.scaleTime = db.aurabar.uniformThreshold
 
 			local buffColor = UF.db.colors.auraBarBuff
 			local debuffColor = UF.db.colors.auraBarDebuff
 			local attachTo = frame
 
 			if(E:CheckClassColor(buffColor.r, buffColor.g, buffColor.b)) then
-				buffColor = E.myclass == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[E.myclass]
+				buffColor = E.myclass == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
 			end
 
 			if(E:CheckClassColor(debuffColor.r, debuffColor.g, debuffColor.b)) then
-				debuffColor = E.myclass == 'PRIEST' and E.PriestColors or RAID_CLASS_COLORS[E.myclass]
+				debuffColor = E.myclass == 'PRIEST' and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
 			end
 
 			if db.aurabar.attachTo == 'BUFFS' then
@@ -1036,9 +1099,9 @@ function UF:Update_PlayerFrame(frame, db)
 	end
 
 	if UF.db.colors.transparentHealth then
-		UF:ToggleTransparentStatusBar(true, frame.Health, frame.Health.bg)
+		UF:ToggleTransparentStatusBar(true, frame.Health, nil)
 	else
-		UF:ToggleTransparentStatusBar(false, frame.Health, frame.Health.bg, (USE_PORTRAIT and USE_PORTRAIT_OVERLAY) ~= true)
+		UF:ToggleTransparentStatusBar(false, frame.Health, nil, (USE_PORTRAIT and USE_PORTRAIT_OVERLAY) ~= true)
 	end
 
 	UF:ToggleTransparentStatusBar(UF.db.colors.transparentPower, frame.Power, frame.Power.bg)
@@ -1048,3 +1111,19 @@ function UF:Update_PlayerFrame(frame, db)
 end
 
 tinsert(UF['unitstoload'], 'player')
+
+--Bugfix: Death Runes show as Blood Runes on first login ( http://git.tukui.org/Elv/elvui/issues/411 )
+--For some reason the registered "PLAYER_ENTERING_WORLD" in runebar.lua doesn't trigger on first login.
+local function UpdateAllRunes()
+	local frame = _G["ElvUF_Player"]
+	if frame and frame.Runes and frame.Runes.UpdateAllRuneTypes then
+		frame.Runes.UpdateAllRuneTypes(frame)
+	end
+end
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_ENTERING_WORLD")
+f:SetScript("OnEvent", function(self, event)
+	self:UnregisterEvent(event)
+
+	C_Timer.After(5, UpdateAllRunes) --Delay it, since the WoW client updates Death Runes after PEW
+end)

@@ -4,6 +4,9 @@ local LDB = LibStub:GetLibrary("LibDataBroker-1.1");
 local LSM = LibStub("LibSharedMedia-3.0")
 local TT = E:GetModule("Tooltip")
 local len = string.len
+local pairs = pairs
+local type = type
+local error = error
 
 function DT:Initialize()
 	--if E.db["datatexts"].enable ~= true then return end
@@ -65,7 +68,7 @@ function DT:RegisterLDB()
 			if value == nil or (len(value) >= 3) or value == 'n/a' or name == value then
 				curFrame.text:SetText(value ~= 'n/a' and value or name)
 			else
-				curFrame.text:SetText(name..': '..hex..value..'|r')
+				curFrame.text:SetFormattedText("%s: %s%s|r", name, hex, value)
 			end
 		end
 
@@ -107,7 +110,7 @@ function DT:UpdateAllDimensions()
 			local pointIndex = DT.PointLocation[i]
 			panel.dataPanels[pointIndex]:Width(width)
 			panel.dataPanels[pointIndex]:Height(height)
-			panel.dataPanels[pointIndex]:Point(DT:GetDataPanelPoint(panel, i, numPoints))
+			panel.dataPanels[pointIndex]:Point(DT:GetDataPanelPoint(panel, i, panel.numPoints))
 		end
 	end
 end
@@ -151,9 +154,12 @@ function DT:RegisterPanel(panel, numPoints, anchor, xOff, yOff)
 	DT.UpdateAllDimensions(panel)
 end
 
-
-
 function DT:AssignPanelToDataText(panel, data)
+	panel.name = ""
+	if data['name'] then
+		panel.name = data['name']
+	end
+
 	if data['events'] then
 		for _, event in pairs(data['events']) do
 			-- use new filtered event registration for appropriate events
@@ -179,11 +185,17 @@ function DT:AssignPanelToDataText(panel, data)
 	end
 
 	if data['onClick'] then
-		panel:SetScript('OnClick', data['onClick'])
+		panel:SetScript('OnClick', function(self, button)
+			if E.db.datatexts.noCombatClick and InCombatLockdown() then return; end
+			data['onClick'](self, button)
+		end)
 	end
 
 	if data['onEnter'] then
-		panel:SetScript('OnEnter', data['onEnter'])
+		panel:SetScript('OnEnter', function(self)
+			if E.db.datatexts.noCombatHover and InCombatLockdown() then return; end
+			data['onEnter'](self)
+		end)
 	end
 
 	if data['onLeave'] then
@@ -201,6 +213,9 @@ function DT:LoadDataTexts()
 
 	local inInstance, instanceType = IsInInstance()
 	local fontTemplate = LSM:Fetch("font", self.db.font)
+	if ElvConfigToggle then
+		ElvConfigToggle.text:FontTemplate(fontTemplate, self.db.fontSize, self.db.fontOutline)
+	end
 	for panelName, panel in pairs(DT.RegisteredPanels) do
 		--Restore Panels
 		for i=1, panel.numPoints do
@@ -211,6 +226,7 @@ function DT:LoadDataTexts()
 			panel.dataPanels[pointIndex]:SetScript('OnLeave', nil)
 			panel.dataPanels[pointIndex]:SetScript('OnClick', nil)
 			panel.dataPanels[pointIndex].text:FontTemplate(fontTemplate, self.db.fontSize, self.db.fontOutline)
+			panel.dataPanels[pointIndex].text:SetWordWrap(self.db.wordWrap)
 			panel.dataPanels[pointIndex].text:SetText(nil)
 			panel.dataPanels[pointIndex].pointIndex = pointIndex
 
@@ -262,6 +278,8 @@ function DT:RegisterDatatext(name, events, eventFunc, updateFunc, clickFunc, onE
 	else
 		error('Cannot register datatext no name was provided.')
 	end
+
+	DT.RegisteredDataTexts[name]['name'] = name
 
 	if type(events) ~= 'table' and events ~= nil then
 		error('Events must be registered as a table.')
